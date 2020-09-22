@@ -54,10 +54,11 @@ class Ping:
                 sock.settimeout(self.timeout)
                 sock.sendall(self.payload)
                 sock.shutdown(socket.SHUT_RD)
-        except socket.gaierror and socket.herror:
+        except socket.gaierror or socket.herror:
             raise errors.InvalidIpOrDomain
-        except Exception:
+        except Exception as e:
             is_error = True
+            raise e
         return is_error, peer_name
 
     def __generate_payload(self):
