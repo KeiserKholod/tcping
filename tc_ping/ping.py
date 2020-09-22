@@ -25,9 +25,9 @@ class Ping:
         benchmarks = []
         for i in range(0, self.pings_count):
             bench = self.__do_one_ping()
-            print(str(bench[0] * 1000))
             benchmarks.append(bench)
         stat = st.Statistic(benchmarks)
+        print()
         print(stat)
 
     def __time_benchmark(do_ping):
@@ -42,6 +42,23 @@ class Ping:
 
         return do_benchmark
 
+    def __write_ping_info(do_ping_after_benchmark):
+        def write_info(self):
+            info = do_ping_after_benchmark(self)
+            local_stat = ''
+            if not info[1]:
+                local_stat = 'From: [{}:{}]: Payload bytes: {};' \
+                             ' Time: {}ms;'.format(str(info[2][0]), str(info[2][1]),
+                                                 str(self.payload_size_bytes),
+                                                 str(info[0] * 1000))
+            else:
+                local_stat = 'Failed'
+            print(local_stat)
+            return info
+
+        return write_info
+
+    @__write_ping_info
     @__time_benchmark
     def __do_one_ping(self):
         is_error = False
@@ -52,8 +69,8 @@ class Ping:
             peer_name = sock.getpeername()
             if self.timeout > 0:
                 sock.settimeout(self.timeout)
-                sock.sendall(self.payload)
-                sock.shutdown(socket.SHUT_RD)
+            sock.sendall(self.payload)
+            sock.shutdown(socket.SHUT_RD)
         except socket.gaierror or socket.herror:
             raise errors.InvalidIpOrDomain
         except Exception as e:
