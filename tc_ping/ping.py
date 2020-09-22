@@ -58,7 +58,6 @@ class Ping:
             raise errors.InvalidIpOrDomain
         except Exception as e:
             is_error = True
-            raise e
         return is_error, peer_name
 
     def __generate_payload(self):
