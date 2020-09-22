@@ -3,4 +3,4 @@ class PingError(Exception):
 
 
 class InvalidIpOrDomain(PingError):
-    message = 'Invalid IP- address or Domain'
+    message = 'Invalid IP-address or Domain'

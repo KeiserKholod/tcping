@@ -1,4 +1,5 @@
 import argparse
+from tc_ping import errors
 from tc_ping import ping as p
 
 
@@ -25,4 +26,10 @@ if __name__ == '__main__':
     ping = p.Ping(destination=args.destination, port=args.port,
                   pings_count=args.pings_count, timeout=args.timeout,
                   delay=args.delay, payload_size_bytes=args.payload_size)
-    ping.do_pings()
+    try:
+        stat = ping.do_pings()
+        print()
+        print(stat)
+    except errors.PingError as e:
+        print('Error: ' + e.message)
+        exit(1)

@@ -27,8 +27,7 @@ class Ping:
             bench = self.__do_one_ping()
             benchmarks.append(bench)
         stat = st.Statistic(benchmarks)
-        print()
-        print(stat)
+        return stat
 
     def __time_benchmark(do_ping):
         def do_benchmark(self):
@@ -49,8 +48,8 @@ class Ping:
             if not info[1]:
                 local_stat = 'From: [{}:{}]: Payload bytes: {};' \
                              ' Time: {}ms;'.format(str(info[2][0]), str(info[2][1]),
-                                                 str(self.payload_size_bytes),
-                                                 str(info[0] * 1000))
+                                                   str(self.payload_size_bytes),
+                                                   str(info[0] * 1000))
             else:
                 local_stat = 'Failed'
             print(local_stat)
