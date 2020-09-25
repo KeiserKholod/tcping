@@ -54,9 +54,6 @@ class Ping:
             end_time = timer()
             work_time = end_time - start_time
             gc.enable()
-            if not info[0]:
-                if self.ip is None:
-                    self.ip = info[1][0]
             stat_data = StatisticsData(work_time, info[0])
             return stat_data
 
