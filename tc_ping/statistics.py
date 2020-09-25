@@ -2,12 +2,12 @@ from tc_ping import errors
 
 
 class Statistics:
-    def __init__(self, all_statistics_data):
+    def __init__(self, all_statistics_data, ip, port):
         if len(all_statistics_data) == 0:
             raise errors.StatisticsError
         self.__all_statistics_data = all_statistics_data
-        self.__ip = all_statistics_data[0].ip
-        self.__port = all_statistics_data[0].port
+        self.__ip = ip
+        self.__port = port
 
     @property
     def benchmarks_count(self):
@@ -31,23 +31,32 @@ class Statistics:
 
     @property
     def average_time(self):
-        time = 0
-        for benchmark in self.successful_benchmarks:
-            time += benchmark.time
-        return time / self.successful_pings_count * 1000
+        try:
+            time = 0
+            for benchmark in self.successful_benchmarks:
+                time += benchmark.time
+            return time / self.successful_pings_count * 1000
+        except ZeroDivisionError:
+            return 0
 
     @property
     def min_time(self):
-        min_time = self.successful_benchmarks[0].time
-        for benchmark in self.successful_benchmarks:
-            min_time = min(min_time, benchmark.time)
+        if len(self.successful_benchmarks) > 0:
+            min_time = self.successful_benchmarks[0].time
+            for benchmark in self.successful_benchmarks:
+                min_time = min(min_time, benchmark.time)
+        else:
+            min_time = 0
         return min_time * 1000
 
     @property
     def max_time(self):
-        max_time = self.successful_benchmarks[0].time
-        for benchmark in self.successful_benchmarks:
-            max_time = max(max_time, benchmark.time)
+        if len(self.successful_benchmarks) > 0:
+            max_time = self.successful_benchmarks[0].time
+            for benchmark in self.successful_benchmarks:
+                max_time = max(max_time, benchmark.time)
+        else:
+            max_time = 0
         return max_time * 1000
 
     @property

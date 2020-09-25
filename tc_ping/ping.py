@@ -21,13 +21,18 @@ class Ping:
         self.delay = int(delay)
         self.payload_size_bytes = int(payload_size_bytes)
         self.payload = self.__generate_payload()
+        self.ip = None
 
     def do_pings(self):
         benchmarks = []
         for i in range(0, self.pings_count):
             bench = self.__do_one_ping()
             benchmarks.append(bench)
-        stat_data = st.Statistics(benchmarks)
+        if self.ip is None:
+            addr = self.destination
+        else:
+            addr = self.ip
+        stat_data = st.Statistics(benchmarks, addr, self.port)
         return stat_data
 
     def __time_benchmark(do_ping):
@@ -38,7 +43,10 @@ class Ping:
             end_time = timer()
             work_time = end_time - start_time
             gc.enable()
-            stat_data = st_data.StatisticsData(work_time, info[0], info[1])
+            if not info[0]:
+                if self.ip is None:
+                    self.ip = info[1][0]
+            stat_data = st_data.StatisticsData(work_time, info[0])
             return stat_data
 
         return do_benchmark
@@ -49,7 +57,7 @@ class Ping:
             local_stat = ''
             if not stat_data.is_failed:
                 local_stat = 'From: [{}:{}]: Payload bytes: {};' \
-                             ' Time: {}ms;'.format(str(stat_data.ip), str(stat_data.port),
+                             ' Time: {}ms;'.format(str(self.ip), str(self.port),
                                                    str(self.payload_size_bytes),
                                                    str(stat_data.time * 1000))
             else:
@@ -76,8 +84,6 @@ class Ping:
             raise errors.InvalidIpOrDomain
         except Exception as e:
             is_error = True
-            if peer_name is None:
-                raise errors.ConnectionError
         return is_error, peer_name
 
     def __generate_payload(self):
