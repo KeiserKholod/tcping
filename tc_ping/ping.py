@@ -66,10 +66,10 @@ class Ping:
         peer_name = None
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.connect((self.destination, self.port))
-            peer_name = sock.getpeername()
             if self.timeout > 0:
                 sock.settimeout(self.timeout)
+            sock.connect((self.destination, self.port))
+            peer_name = sock.getpeername()
             sock.sendall(self.payload)
             sock.shutdown(socket.SHUT_RD)
         except socket.gaierror or socket.herror:
