@@ -50,11 +50,11 @@ class Ping:
         def do_benchmark(self):
             gc.disable()
             start_time = timer()
-            info = do_ping(self)
+            is_error = do_ping(self)
             end_time = timer()
             work_time = end_time - start_time
             gc.enable()
-            stat_data = StatisticsData(work_time, info[0])
+            stat_data = StatisticsData(work_time, is_error)
             return stat_data
 
         return do_benchmark
@@ -92,7 +92,10 @@ class Ping:
             raise errors.InvalidIpOrDomain
         except Exception as e:
             is_error = True
-        return is_error, peer_name
+        if not is_error:
+            if self.ip is None:
+                self.ip = peer_name[0]
+        return is_error
 
     def __generate_payload(self):
         return b'a' * self.payload_size_bytes
