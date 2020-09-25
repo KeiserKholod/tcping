@@ -19,8 +19,8 @@ def create_cmd_parser():
                         help='to set size of the payload to send')
     parser.add_argument('-w', '--while-true', action='store_true', dest="while_true",
                         help='to do pings until keyboard interruption')
-    parser.add_argument('-w', '--while-true', action='store_true', dest="while_true",
-                        help='to do pings until keyboard interruption')
+    parser.add_argument('-6', '--ipv6', action='store_true', dest="use_ipv6",
+                        help='to use ipv6')
     return parser
 
 
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     ping = p.Ping(destination=args.destination, port=args.port,
                   pings_count=args.pings_count, timeout=args.timeout,
                   delay=args.delay, payload_size_bytes=args.payload_size,
-                  while_true=args.while_true)
+                  while_true=args.while_true, use_ipv6=args.use_ipv6)
     try:
         stat = ping.do_pings()
         print()
