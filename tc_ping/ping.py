@@ -14,7 +14,8 @@ class Ping:
                  timeout=0,
                  delay=0,
                  payload_size_bytes=32,
-                 while_true=False):
+                 while_true=False,
+                 use_ipv6=False):
         self.destination = destination
         self.pings_count = int(pings_count)
         self.port = int(port)
@@ -24,6 +25,7 @@ class Ping:
         self.payload = self.__generate_payload()
         self.ip = None
         self.while_true = while_true
+        self.use_ipv6 = use_ipv6
 
     def do_pings(self):
         benchmarks = []
@@ -82,9 +84,14 @@ class Ping:
         peer_name = None
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            if self.use_ipv6:
+                sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
             if self.timeout > 0:
                 sock.settimeout(self.timeout)
-            sock.connect((self.destination, self.port))
+            if not self.use_ipv6:
+                sock.connect((self.destination, self.port))
+            else:
+                sock.connect((self.destination, self.port, 0, 0))
             peer_name = sock.getpeername()
             sock.sendall(self.payload)
             sock.shutdown(socket.SHUT_RD)

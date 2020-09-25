@@ -19,6 +19,8 @@ def create_cmd_parser():
                         help='to set size of the payload to send')
     parser.add_argument('-w', '--while-true', action='store_true', dest="while_true",
                         help='to do pings until keyboard interruption')
+    parser.add_argument('-w', '--while-true', action='store_true', dest="while_true",
+                        help='to do pings until keyboard interruption')
     return parser
 
 
