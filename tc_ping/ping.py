@@ -1,7 +1,8 @@
 import gc
 import socket
 from tc_ping import errors
-from tc_ping import statistic as st
+from tc_ping import statistics_data as st_data
+from tc_ping import statistics as st
 from timeit import default_timer as timer
 
 
@@ -26,8 +27,8 @@ class Ping:
         for i in range(0, self.pings_count):
             bench = self.__do_one_ping()
             benchmarks.append(bench)
-        stat = st.Statistic(benchmarks)
-        return stat
+        stat_data = st.Statistics(benchmarks)
+        return stat_data
 
     def __time_benchmark(do_ping):
         def do_benchmark(self):
@@ -37,23 +38,24 @@ class Ping:
             end_time = timer()
             work_time = end_time - start_time
             gc.enable()
-            return work_time, info[0], info[1]
+            stat_data = st_data.StatisticsData(work_time, info[0], info[1])
+            return stat_data
 
         return do_benchmark
 
     def __write_ping_info(do_ping_after_benchmark):
         def write_info(self):
-            info = do_ping_after_benchmark(self)
+            stat_data = do_ping_after_benchmark(self)
             local_stat = ''
-            if not info[1]:
+            if not stat_data.is_failed:
                 local_stat = 'From: [{}:{}]: Payload bytes: {};' \
-                             ' Time: {}ms;'.format(str(info[2][0]), str(info[2][1]),
+                             ' Time: {}ms;'.format(str(stat_data.ip), str(stat_data.port),
                                                    str(self.payload_size_bytes),
-                                                   str(info[0] * 1000))
+                                                   str(stat_data.time * 1000))
             else:
                 local_stat = 'Failed'
             print(local_stat)
-            return info
+            return stat_data
 
         return write_info
 
@@ -61,7 +63,7 @@ class Ping:
     @__time_benchmark
     def __do_one_ping(self):
         is_error = False
-        peer_name = ''
+        peer_name = None
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.connect((self.destination, self.port))
@@ -74,6 +76,8 @@ class Ping:
             raise errors.InvalidIpOrDomain
         except Exception as e:
             is_error = True
+            if peer_name is None:
+                raise errors.ConnectionError
         return is_error, peer_name
 
     def __generate_payload(self):
