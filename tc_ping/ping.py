@@ -3,6 +3,7 @@ import socket
 from tc_ping import errors
 from tc_ping import statistics as st
 from timeit import default_timer as timer
+import time
 
 
 class Ping:
@@ -27,6 +28,7 @@ class Ping:
         for i in range(0, self.pings_count):
             bench = self.__do_one_ping()
             benchmarks.append(bench)
+            time.sleep(self.delay)
         if self.ip is None:
             addr = self.destination
         else:

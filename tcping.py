@@ -10,7 +10,7 @@ def create_cmd_parser():
     parser.add_argument('-c', '--count', default='4', dest='pings_count',
                         help='count of pings')
     parser.add_argument('-d', '--delay', default='0', dest='delay',
-                        help='time of delay between pings')
+                        help='time of delay between pings in seconds')
     parser.add_argument('-t', '--timeout', default='0', dest='timeout',
                         help='to set timeout')
     parser.add_argument('-p', '--port', default='80', dest='port',
