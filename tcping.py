@@ -17,6 +17,8 @@ def create_cmd_parser():
                         help='to set port')
     parser.add_argument('-l', '--payload', default='32', dest='payload_size',
                         help='to set size of the payload to send')
+    parser.add_argument('-w', '--while-true', action='store_true', dest="while_true",
+                        help='to do pings until keyboard interruption')
     return parser
 
 
@@ -25,7 +27,8 @@ if __name__ == '__main__':
     args = cmd_parser.parse_args()
     ping = p.Ping(destination=args.destination, port=args.port,
                   pings_count=args.pings_count, timeout=args.timeout,
-                  delay=args.delay, payload_size_bytes=args.payload_size)
+                  delay=args.delay, payload_size_bytes=args.payload_size,
+                  while_true=args.while_true)
     try:
         stat = ping.do_pings()
         print()

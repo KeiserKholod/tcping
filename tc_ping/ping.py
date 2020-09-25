@@ -13,7 +13,8 @@ class Ping:
                  pings_count=4,
                  timeout=0,
                  delay=0,
-                 payload_size_bytes=32):
+                 payload_size_bytes=32,
+                 while_true=False):
         self.destination = destination
         self.pings_count = int(pings_count)
         self.port = int(port)
@@ -22,19 +23,28 @@ class Ping:
         self.payload_size_bytes = int(payload_size_bytes)
         self.payload = self.__generate_payload()
         self.ip = None
+        self.while_true = while_true
 
     def do_pings(self):
         benchmarks = []
-        for i in range(0, self.pings_count):
-            bench = self.__do_one_ping()
-            benchmarks.append(bench)
-            time.sleep(self.delay)
-        if self.ip is None:
-            addr = self.destination
-        else:
-            addr = self.ip
-        stat_data = st.Statistics(benchmarks, addr, self.port)
-        return stat_data
+        try:
+            i = 0
+            while True:
+                bench = self.__do_one_ping()
+                benchmarks.append(bench)
+                time.sleep(self.delay)
+                i += 1
+                if not self.while_true and i == self.pings_count:
+                    break
+        except KeyboardInterrupt:
+            pass
+        finally:
+            if self.ip is None:
+                addr = self.destination
+            else:
+                addr = self.ip
+            stat_data = st.Statistics(benchmarks, addr, self.port)
+            return stat_data
 
     def __time_benchmark(do_ping):
         def do_benchmark(self):
