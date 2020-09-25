@@ -1,7 +1,6 @@
 import gc
 import socket
 from tc_ping import errors
-from tc_ping import statistics_data as st_data
 from tc_ping import statistics as st
 from timeit import default_timer as timer
 
@@ -46,7 +45,7 @@ class Ping:
             if not info[0]:
                 if self.ip is None:
                     self.ip = info[1][0]
-            stat_data = st_data.StatisticsData(work_time, info[0])
+            stat_data = StatisticsData(work_time, info[0])
             return stat_data
 
         return do_benchmark
@@ -88,3 +87,9 @@ class Ping:
 
     def __generate_payload(self):
         return b'a' * self.payload_size_bytes
+
+
+class StatisticsData:
+    def __init__(self, time, is_failed):
+        self.time = time
+        self.is_failed = is_failed
