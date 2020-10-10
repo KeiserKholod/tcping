@@ -40,13 +40,15 @@ class Ping:
                     break
         except KeyboardInterrupt:
             pass
-        finally:
-            if self.ip is None:
-                addr = self.destination
-            else:
-                addr = self.ip
-            stat_data = st.Statistics(benchmarks, addr, self.port)
-            return stat_data
+        except errors.PingError:
+            raise
+
+        if self.ip is None:
+            addr = self.destination
+        else:
+            addr = self.ip
+        stat_data = st.Statistics(benchmarks, addr, self.port)
+        return stat_data
 
     def __time_benchmark(do_ping):
         def do_benchmark(self):
@@ -95,7 +97,7 @@ class Ping:
             peer_name = sock.getpeername()
             sock.sendall(self.payload)
             sock.shutdown(socket.SHUT_RD)
-        except socket.gaierror or socket.herror:
+        except (socket.gaierror,socket.herror):
             raise errors.InvalidIpOrDomain
         except Exception as e:
             is_error = True
