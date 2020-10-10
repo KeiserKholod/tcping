@@ -1,6 +1,6 @@
 import unittest
 import argparse
-import tcping
+from tc_ping import __main__ as tcping
 
 from tc_ping import ping as p
 from tc_ping import errors as e
