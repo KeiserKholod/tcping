@@ -21,6 +21,10 @@ def create_cmd_parser():
                         help='to do pings until keyboard interruption')
     parser.add_argument('-6', '--ipv6', action='store_true', dest="use_ipv6",
                         help='to use ipv6')
+    parser.add_argument('-o', '--output-level', default='2', dest="output_level",
+                        help='0 - only summary statistics; '
+                             '1 - write only info for single pings; '
+                             '2 - write all; ')
     return parser
 
 
@@ -30,11 +34,12 @@ if __name__ == '__main__':
     ping = p.Ping(destination=args.destination, port=args.port,
                   pings_count=args.pings_count, timeout=args.timeout,
                   delay=args.delay, payload_size_bytes=args.payload_size,
-                  while_true=args.while_true, use_ipv6=args.use_ipv6)
+                  while_true=args.while_true, use_ipv6=args.use_ipv6, output_level=args.output_level)
     try:
         stat = ping.do_pings()
-        print()
-        print(stat)
+        if int(args.output_level) in (0, 2):
+            print()
+            print(stat)
     except errors.PingError as e:
         print('Error: ' + e.message)
         exit(1)

@@ -15,7 +15,8 @@ class Ping:
                  delay=0,
                  payload_size_bytes=32,
                  while_true=False,
-                 use_ipv6=False):
+                 use_ipv6=False,
+                 output_level=2):
         self.destination = destination
         self.pings_count = int(pings_count)
         self.port = int(port)
@@ -26,6 +27,7 @@ class Ping:
         self.ip = None
         self.while_true = while_true
         self.use_ipv6 = use_ipv6
+        self.output_level = int(output_level)
 
     def do_pings(self):
         benchmarks = []
@@ -74,7 +76,8 @@ class Ping:
                                                    str(stat_data.time * 1000))
             else:
                 local_stat = 'Failed'
-            print(local_stat)
+            if self.output_level > 0:
+                print(local_stat)
             return stat_data
 
         return write_info
@@ -97,7 +100,7 @@ class Ping:
             peer_name = sock.getpeername()
             sock.sendall(self.payload)
             sock.shutdown(socket.SHUT_RD)
-        except (socket.gaierror,socket.herror):
+        except (socket.gaierror, socket.herror):
             raise errors.InvalidIpOrDomain
         except Exception as e:
             is_error = True
