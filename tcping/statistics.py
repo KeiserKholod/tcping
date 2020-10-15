@@ -1,11 +1,11 @@
-from tc_ping import errors
+from tcping import errors
 
 
 class Statistics:
-    def __init__(self, all_statistics_data, ip, port):
-        if len(all_statistics_data) == 0:
+    def __init__(self, all_measures, ip, port):
+        if len(all_measures) == 0:
             raise errors.StatisticsError
-        self.__all_statistics_data = all_statistics_data
+        self.__all_statistics_data = all_measures
         self.__ip = ip
         self.__port = port
 
@@ -34,7 +34,7 @@ class Statistics:
         try:
             time = 0
             for benchmark in self.successful_benchmarks:
-                time += benchmark.time
+                time += benchmark
             return time / self.successful_pings_count * 1000
         except ZeroDivisionError:
             return 0
@@ -42,9 +42,9 @@ class Statistics:
     @property
     def min_time(self):
         if len(self.successful_benchmarks) > 0:
-            min_time = self.successful_benchmarks[0].time
+            min_time = self.successful_benchmarks[0]
             for benchmark in self.successful_benchmarks:
-                min_time = min(min_time, benchmark.time)
+                min_time = min(min_time, benchmark)
         else:
             min_time = 0
         return min_time * 1000
@@ -52,9 +52,9 @@ class Statistics:
     @property
     def max_time(self):
         if len(self.successful_benchmarks) > 0:
-            max_time = self.successful_benchmarks[0].time
+            max_time = self.successful_benchmarks[0]
             for benchmark in self.successful_benchmarks:
-                max_time = max(max_time, benchmark.time)
+                max_time = max(max_time, benchmark)
         else:
             max_time = 0
         return max_time * 1000

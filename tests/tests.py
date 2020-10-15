@@ -1,10 +1,7 @@
 import unittest
-import argparse
-from tc_ping import __main__ as tcping
 
-from tc_ping import ping as p
-from tc_ping import errors as e
-from tc_ping import statistics as st
+from tcping import ping as p, __main__ as tcping
+from tcping import statistics as st
 
 
 class TestCorrectPings(unittest.TestCase):
