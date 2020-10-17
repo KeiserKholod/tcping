@@ -14,7 +14,7 @@ class StatisticsData(float):
             self.is_failed = True
 
 
-class time_measure:
+class TimeMeasure:
     def __init__(self):
         self.start_time = 0
         self.work_time = 0
@@ -58,7 +58,7 @@ class TCPing:
         if self.timeout > 0:
             sock.settimeout(self.timeout)
         try:
-            with time_measure() as measure:
+            with TimeMeasure() as measure:
                 sock.connect(addr)
             if self.ip is None:
                 self.ip = sock.getpeername()[0]
