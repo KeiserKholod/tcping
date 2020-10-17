@@ -60,7 +60,6 @@ class TCPing:
         try:
             with time_measure() as measure:
                 sock.connect(addr)
-                sock.sendall(b'a')
             if self.ip is None:
                 self.ip = sock.getpeername()[0]
             sock.shutdown(socket.SHUT_RD)
