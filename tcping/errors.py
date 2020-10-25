@@ -12,3 +12,7 @@ class ConnectionError(PingError):
 
 class StatisticsError(PingError):
     message = 'count of the benchmarks must be greater than zero'
+
+
+class InvalidPort(PingError):
+    message = 'Invalid port'
