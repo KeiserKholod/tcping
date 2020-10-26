@@ -26,38 +26,41 @@ def create_cmd_parser():
 def show_watchdog_tui(screen):
     cmd_parser = create_cmd_parser()
     args = cmd_parser.parse_args()
-    last_info = ""
-    try:
-        destinations = watchdog_ping.WatchdogPingData.parse_destanations(args.destinations)
-        watchdog_ping_data = watchdog_ping.WatchdogPingData(destinations=destinations,
-                                                            timeout=args.timeout, use_ipv6=args.use_ipv6)
-        delay = int(args.delay)
-        pings = watchdog_ping_data.get_pings()
-        while True:
-            measures = []
-            for tcp_ping in pings:
-                measure = tcp_ping.do_ping()
-                measure_with_destination = measure, tcp_ping.destination
-                measures.append(measure_with_destination)
-            table = watchdog_ping.WatchdogPingData.get_measures_to_print(measures)
-            screen.clear()
-            last_info = table.__str__()
-            lines = table.__str__().split("\n")
-            i = 0
-            for line in lines:
-                i += 1
-                screen.print_at(line, 0, i)
-            ev = screen.get_key()
-            if ev in (ord('Q'), ord('q')):
-                return
-            screen.refresh()
-            time.sleep(delay)
-    except errors.PingError as e:
-        logging.basicConfig(level=logging.INFO)
-        logging.error(e.message)
-        exit(1)
-    except KeyboardInterrupt:
-        print(last_info)
+    if len(args.destinations) == 0:
+        cmd_parser.print_help()
+    else:
+        last_info = ""
+        try:
+            destinations = watchdog_ping.WatchdogPingData.parse_destanations(args.destinations)
+            watchdog_ping_data = watchdog_ping.WatchdogPingData(destinations=destinations,
+                                                                timeout=args.timeout, use_ipv6=args.use_ipv6)
+            delay = int(args.delay)
+            pings = watchdog_ping_data.get_pings()
+            while True:
+                measures = []
+                for tcp_ping in pings:
+                    measure = tcp_ping.do_ping()
+                    measure_with_destination = measure, tcp_ping.destination
+                    measures.append(measure_with_destination)
+                table = watchdog_ping.WatchdogPingData.get_measures_to_print(measures)
+                screen.clear()
+                last_info = table.__str__()
+                lines = table.__str__().split("\n")
+                i = 0
+                for line in lines:
+                    i += 1
+                    screen.print_at(line, 0, i)
+                ev = screen.get_key()
+                if ev in (ord('Q'), ord('q')):
+                    return
+                screen.refresh()
+                time.sleep(delay)
+        except errors.PingError as e:
+            logging.basicConfig(level=logging.INFO)
+            logging.error(e.message)
+            exit(1)
+        except KeyboardInterrupt:
+            print(last_info)
 
 
 if __name__ == '__main__':
