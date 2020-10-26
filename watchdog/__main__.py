@@ -23,7 +23,7 @@ def create_cmd_parser():
     return parser
 
 
-def show_wathcdog_tui(screen):
+def show_watchdog_tui(screen):
     cmd_parser = create_cmd_parser()
     args = cmd_parser.parse_args()
     try:
