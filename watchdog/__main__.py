@@ -26,6 +26,7 @@ def create_cmd_parser():
 def show_watchdog_tui(screen):
     cmd_parser = create_cmd_parser()
     args = cmd_parser.parse_args()
+    last_info = ""
     try:
         destinations = watchdog_ping.WatchdogPingData.parse_destanations(args.destinations)
         watchdog_ping_data = watchdog_ping.WatchdogPingData(destinations=destinations,
@@ -40,6 +41,7 @@ def show_watchdog_tui(screen):
                 measures.append(measure_with_destination)
             table = watchdog_ping.WatchdogPingData.get_measures_to_print(measures)
             screen.clear()
+            last_info = table.__str__()
             lines = table.__str__().split("\n")
             i = 0
             for mes in lines:
@@ -55,8 +57,8 @@ def show_watchdog_tui(screen):
         logging.error(e.message)
         exit(1)
     except KeyboardInterrupt:
-        pass
+        print(last_info)
 
 
 if __name__ == '__main__':
-    Screen.wrapper(show_wathcdog_tui)
+    Screen.wrapper(show_watchdog_tui)
