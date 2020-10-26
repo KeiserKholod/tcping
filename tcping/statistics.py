@@ -37,7 +37,7 @@ class Statistics:
                 time += benchmark
             return time / self.successful_pings_count * 1000
         except ZeroDivisionError:
-            return 0
+            return 0.0
 
     @property
     def min_time(self):
@@ -46,7 +46,7 @@ class Statistics:
             for benchmark in self.successful_benchmarks:
                 min_time = min(min_time, benchmark)
         else:
-            min_time = 0
+            min_time = 0.0
         return min_time * 1000
 
     @property
@@ -56,7 +56,7 @@ class Statistics:
             for benchmark in self.successful_benchmarks:
                 max_time = max(max_time, benchmark)
         else:
-            max_time = 0
+            max_time = 0.0
         return max_time * 1000
 
     @property
@@ -71,5 +71,7 @@ class Statistics:
                                                                             self.benchmarks_count,
                                                                             self.successful_pings_count,
                                                                             self.failed_pings_count,
-                                                                            self.looses_percentage, self.max_time,
-                                                                            self.min_time, self.average_time)
+                                                                            round(self.looses_percentage, 3),
+                                                                            round(self.max_time, 3),
+                                                                            round(self.min_time, 3),
+                                                                            round(self.average_time, 3))

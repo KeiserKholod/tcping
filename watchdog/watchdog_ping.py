@@ -36,11 +36,11 @@ class WatchdogPingData:
     @staticmethod
     def get_measures_to_print(meaures):
         table = PrettyTable()
-        table.field_names = ['destination', 'ip', 'port', 'time', 'condition']
+        table.field_names = ['destination', 'ip', 'port', 'time ms', 'condition']
         for measure_with_destination in meaures:
             destination = measure_with_destination[1]
             port = measure_with_destination[0].port
-            time = measure_with_destination[0]
+            time = round(measure_with_destination[0], 3)
             ip = measure_with_destination[0].ip
             if measure_with_destination[0].is_failed:
                 condition = "Closed"

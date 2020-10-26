@@ -78,4 +78,4 @@ class TCPing:
                                                    str(stat_data.port))
         return 'From: [{}:{}]; Time: {}ms;'.format(str(stat_data.ip),
                                                    str(stat_data.port),
-                                                   str(stat_data * 1000))
+                                                   str(round(stat_data * 1000, 3)))
