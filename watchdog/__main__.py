@@ -3,8 +3,7 @@ import argparse
 from tcping import errors
 import logging
 import time
-import sys
-import os
+from asciimatics.screen import Screen
 
 
 def create_cmd_parser():
@@ -24,7 +23,7 @@ def create_cmd_parser():
     return parser
 
 
-if __name__ == '__main__':
+def show_wathcdog_tui(screen):
     cmd_parser = create_cmd_parser()
     args = cmd_parser.parse_args()
     try:
@@ -40,15 +39,16 @@ if __name__ == '__main__':
                 measure_with_destination = measure, tcp_ping.destination
                 measures.append(measure_with_destination)
             table = watchdog_ping.WatchdogPingData.get_measures_to_print(measures)
-            if sys.platform.lower().startswith("win"):
-                os.system("cls")
-            else:
-                if sys.platform.lower().startswith("darwin") or \
-                        sys.platform.lower().startswith("linux"):
-                    os.system("clear")
-                else:
-                    pass
-            print(table.__str__())
+            screen.clear()
+            lines = table.__str__().split("\n")
+            i = 0
+            for mes in lines:
+                i += 1
+                screen.print_at(mes, 0, i)
+            ev = screen.get_key()
+            if ev in (ord('Q'), ord('q')):
+                return
+            screen.refresh()
             time.sleep(delay)
     except errors.PingError as e:
         logging.basicConfig(level=logging.INFO)
@@ -56,3 +56,7 @@ if __name__ == '__main__':
         exit(1)
     except KeyboardInterrupt:
         pass
+
+
+if __name__ == '__main__':
+    Screen.wrapper(show_wathcdog_tui)
