@@ -58,11 +58,11 @@ class TCPing:
         if self.timeout > 0:
             sock.settimeout(self.timeout)
         try:
+            if self.ip is None:
+                self.ip = socket.gethostbyname(self.destination)
             with TimeMeasure() as measure:
                 sock.connect(addr)
-            if self.ip is None:
-                self.ip = sock.getpeername()[0]
-            sock.shutdown(socket.SHUT_RD)
+                sock.shutdown(socket.SHUT_RD)
             return measure.work_time
         except (socket.gaierror, socket.herror):
             raise errors.InvalidIpOrDomain
@@ -74,7 +74,8 @@ class TCPing:
     @staticmethod
     def prepare_ping_info(stat_data: StatisticsData):
         if stat_data.is_failed:
-            return 'Failed;'
+            return 'From: [{}:{}]; Failed;'.format(str(stat_data.ip),
+                                                   str(stat_data.port))
         return 'From: [{}:{}]; Time: {}ms;'.format(str(stat_data.ip),
                                                    str(stat_data.port),
                                                    str(stat_data * 1000))

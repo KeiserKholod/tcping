@@ -44,8 +44,9 @@ class WatchdogPingData:
             ip = measure_with_destination[0].ip
             if measure_with_destination[0].is_failed:
                 condition = "Closed"
-                ip = "Error"
             else:
                 condition = "Open"
+            if time < 0:
+                time = "-"
             table.add_row([destination, ip, port, time, condition])
         return table
