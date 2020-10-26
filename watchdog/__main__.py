@@ -44,9 +44,9 @@ def show_watchdog_tui(screen):
             last_info = table.__str__()
             lines = table.__str__().split("\n")
             i = 0
-            for mes in lines:
+            for line in lines:
                 i += 1
-                screen.print_at(mes, 0, i)
+                screen.print_at(line, 0, i)
             ev = screen.get_key()
             if ev in (ord('Q'), ord('q')):
                 return
