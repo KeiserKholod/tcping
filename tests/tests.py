@@ -4,6 +4,7 @@ from tcping import ping
 from tcping import statistics
 from tcping import __main__ as tcping
 from tcping import errors
+from watchdog import watchdog_ping
 
 
 class TestCorrectPings(unittest.TestCase):
@@ -83,7 +84,7 @@ class TestStatistics(unittest.TestCase):
         self.assertEqual(expected, ping_info)
 
     def test_prepare_ping_info_if_failed(self):
-        expected = "Failed;"
+        expected = "From: [127.0.0.1:123]; Failed;"
         single_stat = ping.StatisticsData(-1, ip='127.0.0.1', port=123)
         ping_info = ping.TCPing.prepare_ping_info(single_stat)
         self.assertEqual(expected, ping_info)
@@ -110,7 +111,7 @@ class TestStatistics(unittest.TestCase):
         excpected = "Statistic tcping for [127.0.0.1:123]:\n" \
                     "Pings count: 4, Successful: 0, Failed: 4\n" \
                     "Fails percentage: 100.0\n" \
-                    "Max time: 0ms, Min time: 0ms, Average time 0ms\n"
+                    "Max time: 0.0ms, Min time: 0.0ms, Average time 0.0ms\n"
 
         measures = []
         single_stat = ping.StatisticsData(-1, ip='127.0.0.1', port=123)
@@ -156,6 +157,60 @@ class TestStatistics(unittest.TestCase):
     def test_statistics_data_if_failed(self):
         single_stat = ping.StatisticsData(-1, ip='127.0.0.1', port=123)
         self.assertEqual(single_stat.is_failed, True)
+
+
+class TestWatchdog(unittest.TestCase):
+    def test_parse_destinations(self):
+        raw_destinations = ['google.com', 'google.com:443', '127.0.0.1', '127.0.0.1:123']
+        expected_destinations = [('google.com', "80"), ('google.com', "443"), ('127.0.0.1', "80"), ('127.0.0.1', "123")]
+        parsed_destinations = watchdog_ping.WatchdogPingData.parse_destanations(raw_destinations)
+        self.assertEqual(expected_destinations, parsed_destinations)
+
+    def test_init(self):
+        raw_destinations = ['google.com', 'google.com:443', '127.0.0.1', '127.0.0.1:123']
+        parsed_destinations = watchdog_ping.WatchdogPingData.parse_destanations(raw_destinations)
+        watchdog_ping_object = watchdog_ping.WatchdogPingData(destinations=parsed_destinations, timeout=1,
+                                                              use_ipv6=True)
+        self.assertEqual(watchdog_ping_object.destinations, parsed_destinations)
+        self.assertEqual(watchdog_ping_object.timeout, 1)
+        self.assertEqual(watchdog_ping_object.use_ipv6, True)
+
+    def test_init_default(self):
+        watchdog_ping_object = watchdog_ping.WatchdogPingData()
+        self.assertEqual(watchdog_ping_object.destinations, [])
+        self.assertEqual(watchdog_ping_object.timeout, 0)
+        self.assertEqual(watchdog_ping_object.use_ipv6, False)
+
+    def test_get_pings(self):
+        raw_destinations = ['google.com', 'google.com:443']
+        pings_expected = [ping.TCPing(destination='google.com', port=80, use_ipv6=False, timeout=1),
+                          ping.TCPing(destination='google.com', port=443, use_ipv6=False, timeout=1)]
+        parsed_destinations = watchdog_ping.WatchdogPingData.parse_destanations(raw_destinations)
+        watchdog_ping_object = watchdog_ping.WatchdogPingData(destinations=parsed_destinations, timeout=1,
+                                                              use_ipv6=False)
+        pings = watchdog_ping_object.get_pings()
+        self.assertEqual(len(pings_expected), len(pings))
+        self.assertEqual(type(pings[0]), ping.TCPing)
+        self.assertEqual(type(pings[1]), ping.TCPing)
+
+    def test_get_measures_to_print(self):
+        measures_to_print_expected = """+-------------+-------------+------+---------+-----------+
+| destination |      ip     | port | time ms | condition |
++-------------+-------------+------+---------+-----------+
+|  hemlo.com  |  127.0.0.1  | 123  |   0.05  |    Open   |
+|  google.com | 192.168.0.2 | 443  |   0.05  |    Open   |
+|   meow.org  | 192.167.2.1 | 123  |    -    |   Closed  |
++-------------+-------------+------+---------+-----------+"""
+        measures_with_dest = []
+        single_stat = ping.StatisticsData(0.050, ip='127.0.0.1', port=123), "hemlo.com"
+        measures_with_dest.append(single_stat)
+        single_stat = ping.StatisticsData(0.050, ip='192.168.0.2', port=443), "google.com"
+        measures_with_dest.append(single_stat)
+        single_stat = ping.StatisticsData(-1, ip='192.167.2.1', port=123), "meow.org"
+        measures_with_dest.append(single_stat)
+
+        measures_to_print = watchdog_ping.WatchdogPingData.get_measures_to_print(measures_with_dest)
+        self.assertEqual(measures_to_print_expected, measures_to_print.__str__())
 
 
 if __name__ == '__main__':
