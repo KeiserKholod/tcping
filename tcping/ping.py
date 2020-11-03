@@ -42,7 +42,7 @@ class TCPing:
         self.use_ipv6 = use_ipv6
         self.measures = []
 
-    def do_ping(self):
+    async def do_ping(self):
         work_time = self.ping()
         measure = StatisticsData(work_time, ip=self.ip, port=self.port)
         self.measures.append(measure)

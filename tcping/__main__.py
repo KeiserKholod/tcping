@@ -3,6 +3,7 @@ from tcping import errors
 from tcping import ping
 from tcping import statistics
 import logging
+import asyncio
 import time
 
 
@@ -27,7 +28,7 @@ def create_cmd_parser():
     return parser
 
 
-if __name__ == '__main__':
+async def main():
     cmd_parser = create_cmd_parser()
     args = cmd_parser.parse_args()
     tcp_ping = ping.TCPing(destination=args.destination, port=args.port,
@@ -38,7 +39,7 @@ if __name__ == '__main__':
     try:
         i = 0
         while i != pings_count:
-            measure = tcp_ping.do_ping()
+            measure = await tcp_ping.do_ping()
             if output_level > 0:
                 print(tcp_ping.prepare_ping_info(measure))
             if delay > measure:
@@ -55,3 +56,7 @@ if __name__ == '__main__':
             print()
         stat = statistics.Statistics(tcp_ping.measures, tcp_ping.ip, tcp_ping.port)
         print(stat)
+
+
+if __name__ == '__main__':
+    asyncio.run(main())

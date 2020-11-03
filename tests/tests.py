@@ -1,5 +1,5 @@
 import unittest
-
+import asyncio
 from tcping import ping
 from tcping import statistics
 from tcping import __main__ as tcping
@@ -8,41 +8,41 @@ from watchdog import watchdog_ping
 
 
 class TestCorrectPings(unittest.TestCase):
-    def test_ping_domain_standart(self):
+    async def test_ping_domain_standart(self):
         cmd_parser = tcping.create_cmd_parser()
         args = cmd_parser.parse_args(['google.com'])
         tcp_ping = ping.TCPing(destination=args.destination, port=args.port,
                                timeout=args.timeout, use_ipv6=args.use_ipv6)
         pings_count = int(args.pings_count)
-        one_measure = tcp_ping.do_ping()
+        one_measure = await tcp_ping.do_ping()
         self.assertEqual(len(tcp_ping.measures), 1)
 
-    def test_ping_domain_incorrect(self):
+    async def test_ping_domain_incorrect(self):
         cmd_parser = tcping.create_cmd_parser()
         args = cmd_parser.parse_args(['google.csom'])
         tcp_ping = ping.TCPing(destination=args.destination, port=args.port,
                                timeout=args.timeout, use_ipv6=args.use_ipv6)
         pings_count = int(args.pings_count)
         with self.assertRaises(errors.InvalidIpOrDomain):
-            one_measure = tcp_ping.do_ping()
+            one_measure = await tcp_ping.do_ping()
 
-    def test_ping_ip_standart(self):
+    async def test_ping_ip_standart(self):
         cmd_parser = tcping.create_cmd_parser()
         args = cmd_parser.parse_args(['64.233.165.101', '-c', '10'])
         tcp_ping = ping.TCPing(destination=args.destination, port=args.port,
                                timeout=args.timeout, use_ipv6=args.use_ipv6)
         pings_count = int(args.pings_count)
-        one_measure = tcp_ping.do_ping()
+        one_measure = await tcp_ping.do_ping()
         self.assertEqual(len(tcp_ping.measures), 1)
 
-    def test_ping_ip_incorrect(self):
+    async def test_ping_ip_incorrect(self):
         cmd_parser = tcping.create_cmd_parser()
         args = cmd_parser.parse_args(['64.233.165.101.123.214'])
         tcp_ping = ping.TCPing(destination=args.destination, port=args.port,
                                timeout=args.timeout, use_ipv6=args.use_ipv6)
         pings_count = int(args.pings_count)
         with self.assertRaises(errors.InvalidIpOrDomain):
-            one_measure = tcp_ping.do_ping()
+            one_measure = await tcp_ping.do_ping()
 
 
 class TestParsing(unittest.TestCase):
