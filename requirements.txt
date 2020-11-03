@@ -1,2 +1,2 @@
 prettytable
-asciimatic
+asciimatics
