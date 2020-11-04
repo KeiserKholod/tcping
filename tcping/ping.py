@@ -5,6 +5,9 @@ import time
 
 
 class StatisticsData(float):
+    """Contains information about ping duration, destination ip and port
+    in case of exception in ping, time equals -1 and field is_failed equals True."""
+
     def __init__(self, time: float, ip: str, port: int):
         super().__init__()
         self.ip = ip
@@ -15,6 +18,8 @@ class StatisticsData(float):
 
 
 class TimeMeasure:
+    """Context manager for ping duration measuring."""
+
     def __init__(self):
         self.start_time = 0
         self.work_time = 0
@@ -30,6 +35,8 @@ class TimeMeasure:
 
 
 class TCPing:
+    """Contains methods to do async ping and get info about ping."""
+
     def __init__(self,
                  destination=None,
                  port=80,
@@ -42,13 +49,18 @@ class TCPing:
         self.use_ipv6 = use_ipv6
         self.measures = []
 
-    def do_ping(self):
+    async def do_ping(self):
+        """Do one ping and return StatisticsData object."""
+
         work_time = self.ping()
         measure = StatisticsData(work_time, ip=self.ip, port=self.port)
         self.measures.append(measure)
         return measure
 
     def ping(self) -> float:
+        """Do one ping and return time of ping duration.
+         In case of exception, return -1."""
+
         addr = (self.destination, self.port)
         family_addr = socket.AF_INET
         if self.use_ipv6:
@@ -73,6 +85,9 @@ class TCPing:
 
     @staticmethod
     def prepare_ping_info(stat_data: StatisticsData):
+        """Return string with information about duration,
+         destination ip and por and status of a single ping"""
+
         if stat_data.is_failed:
             return 'From: [{}:{}]; Failed;'.format(str(stat_data.ip),
                                                    str(stat_data.port))
