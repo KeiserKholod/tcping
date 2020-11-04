@@ -42,7 +42,7 @@ async def main():
             measure = await tcp_ping.do_ping()
             if output_level > 0:
                 print(tcp_ping.prepare_ping_info(measure))
-            if delay > measure:
+            if delay > measure > 0:
                 time.sleep(delay - measure)
             i += 1
     except errors.PingError as e:

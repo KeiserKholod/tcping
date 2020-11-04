@@ -3,6 +3,7 @@ import argparse
 from tcping import errors
 import logging
 import time
+import asyncio
 from asciimatics.screen import Screen
 
 
@@ -24,6 +25,7 @@ def create_cmd_parser():
 
 
 def show_watchdog_tui(screen):
+    ioloop = asyncio.get_event_loop()
     cmd_parser = create_cmd_parser()
     args = cmd_parser.parse_args()
     if len(args.destinations) == 0:
@@ -37,13 +39,21 @@ def show_watchdog_tui(screen):
             delay = float(args.delay)
             pings = watchdog_ping_data.get_pings()
             while True:
+                tasks = watchdog_ping.WatchdogPingData.create_tasks_from_pings(pings, ioloop)
+                wait_tasks = asyncio.wait(tasks)
+                done, pending = ioloop.run_until_complete(wait_tasks)
+                count = 0
                 measures = []
-                for tcp_ping in pings:
-                    measure = tcp_ping.do_ping()
-                    if delay > measure:
-                        time.sleep(delay - measure)
-                    measure_with_destination = measure, tcp_ping.destination
-                    measures.append(measure_with_destination)
+                while count < len(tasks):
+                    count = 0
+                    for task in tasks:
+                        if task in done:
+                            measures.append((task.result(), pings[count].destination))
+                            count += 1
+                        else:
+                            count = 0
+                            measures = []
+
                 table = watchdog_ping.WatchdogPingData.get_measures_to_print(measures)
                 screen.clear()
                 last_info = table.__str__()
@@ -56,12 +66,17 @@ def show_watchdog_tui(screen):
                 if ev in (ord('Q'), ord('q')):
                     return
                 screen.refresh()
+                max_time, min_time = watchdog_ping.WatchdogPingData.get_max_and_min_time(measures)
+                if max_time < delay and min_time > 0:
+                    time.sleep(delay - max_time)
         except errors.PingError as e:
             logging.basicConfig(level=logging.INFO)
             logging.error(e.message)
             exit(1)
         except KeyboardInterrupt:
             print(last_info)
+        finally:
+            ioloop.close()
 
 
 if __name__ == '__main__':

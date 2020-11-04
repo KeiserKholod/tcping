@@ -1,6 +1,7 @@
 from tcping import errors
 from tcping import ping
 from prettytable import PrettyTable
+import asyncio
 
 
 class WatchdogPingData:
@@ -32,6 +33,24 @@ class WatchdogPingData:
                                   timeout=self.timeout, use_ipv6=self.use_ipv6)
             pings.append(wd_ping)
         return pings
+
+    @staticmethod
+    def create_tasks_from_pings(pings, ioloop):
+        tasks = []
+        for ping in pings:
+            tasks.append(ioloop.create_task(ping.do_ping()))
+        return tasks
+
+    @staticmethod
+    def get_max_and_min_time(measures_with_destinations):
+        max = 0
+        min = float("inf")
+        for measure in measures_with_destinations:
+            if max < measure[0]:
+                max = measure[0]
+            if min > measure[0]:
+                min = measure[0]
+        return max, min
 
     @staticmethod
     def get_measures_to_print(meaures):
