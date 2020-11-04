@@ -186,12 +186,12 @@ class TestWatchdog(unittest.TestCase):
     def test_parse_destinations(self):
         raw_destinations = ['google.com', 'google.com:443', '127.0.0.1', '127.0.0.1:123']
         expected_destinations = [('google.com', "80"), ('google.com', "443"), ('127.0.0.1', "80"), ('127.0.0.1', "123")]
-        parsed_destinations = watchdog_ping.WatchdogPingData.parse_destanations(raw_destinations)
+        parsed_destinations = watchdog_ping.WatchdogPingData.parse_destinations(raw_destinations)
         self.assertEqual(expected_destinations, parsed_destinations)
 
     def test_init(self):
         raw_destinations = ['google.com', 'google.com:443', '127.0.0.1', '127.0.0.1:123']
-        parsed_destinations = watchdog_ping.WatchdogPingData.parse_destanations(raw_destinations)
+        parsed_destinations = watchdog_ping.WatchdogPingData.parse_destinations(raw_destinations)
         watchdog_ping_object = watchdog_ping.WatchdogPingData(destinations=parsed_destinations, timeout=1,
                                                               use_ipv6=True)
         self.assertEqual(watchdog_ping_object.destinations, parsed_destinations)
@@ -208,7 +208,7 @@ class TestWatchdog(unittest.TestCase):
         raw_destinations = ['google.com', 'google.com:443']
         pings_expected = [ping.TCPing(destination='google.com', port=80, use_ipv6=False, timeout=1),
                           ping.TCPing(destination='google.com', port=443, use_ipv6=False, timeout=1)]
-        parsed_destinations = watchdog_ping.WatchdogPingData.parse_destanations(raw_destinations)
+        parsed_destinations = watchdog_ping.WatchdogPingData.parse_destinations(raw_destinations)
         watchdog_ping_object = watchdog_ping.WatchdogPingData(destinations=parsed_destinations, timeout=1,
                                                               use_ipv6=False)
         pings = watchdog_ping_object.get_pings()
@@ -237,7 +237,7 @@ class TestWatchdog(unittest.TestCase):
 
     def test_create_tasks(self):
         raw_destinations = ['google.com', 'google.com:443']
-        parsed_destinations = watchdog_ping.WatchdogPingData.parse_destanations(raw_destinations)
+        parsed_destinations = watchdog_ping.WatchdogPingData.parse_destinations(raw_destinations)
         watchdog_ping_object = watchdog_ping.WatchdogPingData(destinations=parsed_destinations, timeout=1,
                                                               use_ipv6=False)
         pings = watchdog_ping_object.get_pings()

@@ -33,7 +33,7 @@ def show_watchdog_tui(screen):
     else:
         last_info = ""
         try:
-            destinations = watchdog_ping.WatchdogPingData.parse_destanations(args.destinations)
+            destinations = watchdog_ping.WatchdogPingData.parse_destinations(args.destinations)
             watchdog_ping_data = watchdog_ping.WatchdogPingData(destinations=destinations,
                                                                 timeout=args.timeout, use_ipv6=args.use_ipv6)
             delay = float(args.delay)
