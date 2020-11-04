@@ -1,3 +1,4 @@
+import _asyncio
 import unittest
 import asyncio
 from tcping import ping
@@ -7,7 +8,29 @@ from tcping import errors
 from watchdog import watchdog_ping
 
 
-class TestCorrectPings(unittest.TestCase):
+class AioTestCase(unittest.TestCase):
+
+    def __init__(self, method_name='runTest', loop=None):
+        self.loop = loop or asyncio.get_event_loop()
+        self._function_cache = {}
+        super(AioTestCase, self).__init__(methodName=method_name)
+
+    def coroutine_function_decorator(self, func):
+        def wrapper(*args, **kw):
+            return self.loop.run_until_complete(func(*args, **kw))
+
+        return wrapper
+
+    def __getattribute__(self, item):
+        attr = object.__getattribute__(self, item)
+        if asyncio.iscoroutinefunction(attr):
+            if item not in self._function_cache:
+                self._function_cache[item] = self.coroutine_function_decorator(attr)
+            return self._function_cache[item]
+        return attr
+
+
+class TestCorrectPings(AioTestCase):
     async def test_ping_domain_standart(self):
         cmd_parser = tcping.create_cmd_parser()
         args = cmd_parser.parse_args(['google.com'])
@@ -211,6 +234,29 @@ class TestWatchdog(unittest.TestCase):
 
         measures_to_print = watchdog_ping.WatchdogPingData.get_measures_to_print(measures_with_dest)
         self.assertEqual(measures_to_print_expected, measures_to_print.__str__())
+
+    def test_create_tasks(self):
+        raw_destinations = ['google.com', 'google.com:443']
+        parsed_destinations = watchdog_ping.WatchdogPingData.parse_destanations(raw_destinations)
+        watchdog_ping_object = watchdog_ping.WatchdogPingData(destinations=parsed_destinations, timeout=1,
+                                                              use_ipv6=False)
+        pings = watchdog_ping_object.get_pings()
+        tasks = watchdog_ping_object.create_tasks_from_pings(pings, ioloop=asyncio.get_event_loop())
+        self.assertIsInstance(tasks, list)
+        self.assertGreater(len(tasks), 0)
+        self.assertIsInstance(tasks[0], _asyncio.Task)
+
+    def test_min_max(self):
+        measures_with_dest = []
+        single_stat = ping.StatisticsData(0.050, ip='127.0.0.1', port=123), "hemlo.com"
+        measures_with_dest.append(single_stat)
+        single_stat = ping.StatisticsData(0.059, ip='192.168.0.2', port=443), "google.com"
+        measures_with_dest.append(single_stat)
+        single_stat = ping.StatisticsData(-1, ip='192.167.2.1', port=123), "meow.org"
+        measures_with_dest.append(single_stat)
+        max, min = watchdog_ping.WatchdogPingData.get_max_and_min_time(measures_with_dest)
+        self.assertEqual(max, 0.059)
+        self.assertEqual(min, -1)
 
 
 if __name__ == '__main__':
