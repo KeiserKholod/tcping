@@ -49,15 +49,15 @@ class TCPing:
         self.use_ipv6 = use_ipv6
         self.measures = []
 
-    async def do_ping(self):
+    async def do_ping_with_connect(self):
         """Do one ping and return StatisticsData object."""
 
-        work_time = self.ping()
+        work_time = self.ping_with_connect()
         measure = StatisticsData(work_time, ip=self.ip, port=self.port)
         self.measures.append(measure)
         return measure
 
-    def ping(self) -> float:
+    def ping_with_connect(self) -> float:
         """Do one ping and return time of ping duration.
          In case of exception, return -1."""
 

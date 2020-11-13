@@ -37,7 +37,7 @@ class TestCorrectPings(AioTestCase):
         tcp_ping = ping.TCPing(destination=args.destination, port=args.port,
                                timeout=args.timeout, use_ipv6=args.use_ipv6)
         pings_count = int(args.pings_count)
-        one_measure = await tcp_ping.do_ping()
+        one_measure = await tcp_ping.do_ping_with_connect()
         self.assertEqual(len(tcp_ping.measures), 1)
 
     async def test_ping_domain_incorrect(self):
@@ -47,7 +47,7 @@ class TestCorrectPings(AioTestCase):
                                timeout=args.timeout, use_ipv6=args.use_ipv6)
         pings_count = int(args.pings_count)
         with self.assertRaises(errors.InvalidIpOrDomain):
-            one_measure = await tcp_ping.do_ping()
+            one_measure = await tcp_ping.do_ping_with_connect()
 
     async def test_ping_ip_standart(self):
         cmd_parser = tcping.create_cmd_parser()
@@ -55,7 +55,7 @@ class TestCorrectPings(AioTestCase):
         tcp_ping = ping.TCPing(destination=args.destination, port=args.port,
                                timeout=args.timeout, use_ipv6=args.use_ipv6)
         pings_count = int(args.pings_count)
-        one_measure = await tcp_ping.do_ping()
+        one_measure = await tcp_ping.do_ping_with_connect()
         self.assertEqual(len(tcp_ping.measures), 1)
 
     async def test_ping_ip_incorrect(self):
@@ -65,7 +65,7 @@ class TestCorrectPings(AioTestCase):
                                timeout=args.timeout, use_ipv6=args.use_ipv6)
         pings_count = int(args.pings_count)
         with self.assertRaises(errors.InvalidIpOrDomain):
-            one_measure = await tcp_ping.do_ping()
+            one_measure = await tcp_ping.do_ping_with_connect()
 
 
 class TestParsing(unittest.TestCase):
