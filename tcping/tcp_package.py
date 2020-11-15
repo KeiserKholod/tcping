@@ -1,4 +1,4 @@
-from struct import *
+import struct
 import socket
 
 
@@ -18,7 +18,8 @@ class TCPPackage:
                  ack_seq=0,
                  ttl=255,
                  id=54321,
-                 use_ipv6=False
+                 use_ipv6=False,
+                 data=b''
                  ):
         self.flags = flags
         self.source_ip = source_ip
@@ -34,6 +35,7 @@ class TCPPackage:
         # Id of this packet, random number
         self.id = id
         self.use_ipv6 = use_ipv6
+        self.data = data
 
     # checksum functions needed for calculation checksum
     @staticmethod
@@ -70,9 +72,9 @@ class TCPPackage:
                     (self.flags["urg"] << 5)
 
         # pre-build to calculate checksum
-        tcp_headers = pack('!HHLLBBHHH', self.source_port, self.dest_port, self.seq, self.ack_seq, offset_res,
-                           tcp_flags,
-                           window, self.check, self.urg_ptr)
+        tcp_headers = struct.pack('!HHLLBBHHH', self.source_port, self.dest_port, self.seq, self.ack_seq, offset_res,
+                                  tcp_flags,
+                                  window, self.check, self.urg_ptr)
 
         # pseudo header fields
         source_address = socket.inet_aton(self.source_ip)
@@ -81,14 +83,14 @@ class TCPPackage:
         protocol = socket.IPPROTO_TCP
         tcp_length = len(tcp_headers)
 
-        pseudo_headers = pack('!4s4sBBH', source_address, dest_address, placeholder, protocol, tcp_length)
+        pseudo_headers = struct.pack('!4s4sBBH', source_address, dest_address, placeholder, protocol, tcp_length)
         pseudo_headers += tcp_headers
 
         self.check = TCPPackage.calculate_checksum(pseudo_headers.decode("1251"))
         # get tcp headers with checksum
-        tcp_headers = pack('!HHLLBBHHH', self.source_port, self.dest_port, self.seq, self.ack_seq, offset_res,
-                           tcp_flags,
-                           window, self.check, self.urg_ptr)
+        tcp_headers = struct.pack('!HHLLBBHHH', self.source_port, self.dest_port, self.seq, self.ack_seq, offset_res,
+                                  tcp_flags,
+                                  window, self.check, self.urg_ptr)
         return tcp_headers
 
     def get_ipv4_headers(self) -> bytes:
@@ -102,13 +104,65 @@ class TCPPackage:
         source_addr = socket.inet_aton(self.source_ip)
         dest_addr = socket.inet_aton(self.dest_ip)
         ihl_version = (version << 4) + ihl
-
-        ip_header = pack('!BBHHHBBH4s4s', ihl_version, tos, tot_len, self.id, frag_off, self.ttl, protocol, check,
-                         source_addr,
-                         dest_addr)
+        # print(ihl_version)
+        # print(tos)
+        # print(tot_len)
+        # print(self.id)
+        # print(frag_off)
+        # print(self.ttl)
+        # print(protocol)
+        # print(check)
+        # print(source_addr)
+        # print(dest_addr)
+        # print()
+        ip_header = struct.pack('!BBHHHBBH4s4s', ihl_version, tos, tot_len, self.id, frag_off, self.ttl, protocol,
+                                check,
+                                source_addr,
+                                dest_addr)
         return ip_header
 
     @staticmethod
     # не получается сделать тайпинг на обьект этого класса
-    def parse_tcp_package(raw_data):
-        return TCPPackage()
+    def parse_tcp_ipv4_package(raw_data):
+        package = TCPPackage()
+        TCPPackage.parse_ipv4_headers(package, raw_data[:40])
+        TCPPackage.parse_tcp_headers(package, raw_data[:40])
+        return package
+
+    @staticmethod
+    def parse_ipv4_headers(tcp_pack, raw_data):
+        headers = struct.unpack('!BBHHHBBH4s4sHHLLBBHHH', raw_data)
+        # ipv4
+        # в идеале должно писать все это как поля в self
+        ihl_version = headers[0]
+        tos = headers[1]
+        tot_len = headers[2]
+        tcp_pack.id = headers[3]
+        frag_off = headers[4]
+        tcp_pack.ttl = headers[5]
+        protocol = headers[6]
+        check = headers[7]
+        source_addr = headers[8]
+        tcp_pack.source_ip = socket.inet_ntoa(source_addr)
+        dest_addr = headers[9]
+        tcp_pack.dest_ip = socket.inet_ntoa(dest_addr)
+
+    @staticmethod
+    def parse_tcp_headers(tcp_pack, raw_data):
+        headers = struct.unpack('!BBHHHBBH4s4sHHLLBBHHH', raw_data)
+        # tcp
+        # tcp_headers = pack('!HHLLBBHHH5H', self.source_port, self.dest_port, self.seq, self.ack_seq, offset_res,
+        #                    tcp_flags,
+        #                    window, self.check, self.urg_ptr, self.data)
+        tcp_pack.source_port = headers[10]
+        tcp_pack.dest_port = headers[11]
+        tcp_pack.seq = headers[12]
+        tcp_pack.ack_seq = headers[13]
+        tcp_pack.offset_res = headers[14]
+        flags = headers[15]
+        tcp_pack.window = socket.ntohs(headers[16])
+        tcp_pack.check = headers[17]
+        tcp_pack.urg_ptr = headers[18]
+        tcp_pack.data = headers[19:]
+
+

@@ -73,6 +73,12 @@ class TCPing:
                      "psh": 0,
                      "ack": 0,
                      "urg": 0}
+        ack_flags = {"fin": 0,
+                     "syn": 1,
+                     "rst": 0,
+                     "psh": 0,
+                     "ack": 0,
+                     "urg": 0}
         source_ip = "192.168.0.1"
         source_port = 1234
         dest_ip = socket.gethostbyname(self.destination)
@@ -82,20 +88,29 @@ class TCPing:
                                           dest_ip=dest_ip, dest_port=self.port,
                                           seq=seq, ack_seq=ack_seq,
                                           source_port=source_port).__bytes__()
-        sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_TCP)
-        sock.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
-        sock.bind((dest_ip, source_port))
-        with TimeMeasure() as measure:
-            # send syn
-            sock.sendto(syn_pack, (dest_ip, self.port))
-            response = None
-            while measure.work_time <= self.timeout and response is None:
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_TCP)
+            sock.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+            with TimeMeasure() as measure:
+                # send syn
+                sock.sendto(syn_pack, (dest_ip, self.port))
+                response = None
                 # recive ack
-                response = sock.recvfrom(4096)[0]
-        if response is not None:
-            return -1
-        else:
+                while measure.work_time <= self.timeout and response is None:
+                    response = sock.recvfrom(4096)[0]
+                if response is None:
+                    return -1
+
+                seq += 1
+                ack_seq += 1
+                ack_pack = tcp_package.TCPPackage(flags=ack_flags, source_ip=source_ip,
+                                                  dest_ip=dest_ip, dest_port=self.port,
+                                                  seq=seq, ack_seq=ack_seq,
+                                                  source_port=source_port).__bytes__()
+                sock.sendto(ack_pack, (dest_ip, self.port))
             return measure.work_time
+        except (socket.gaierror, socket.herror):
+            raise errors.InvalidIpOrDomain
 
     def ping_with_connect(self) -> float:
         """Do one ping and return time of ping duration.
