@@ -47,7 +47,7 @@ class WatchdogPingData:
 
         tasks = []
         for ping in pings:
-            tasks.append(ioloop.create_task(ping.do_ping_with_connect()))
+            tasks.append(ioloop.create_task(ping.do_ping()))
         return tasks
 
     @staticmethod

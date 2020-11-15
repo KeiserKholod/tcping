@@ -50,7 +50,7 @@ class TCPPackage:
 
         return sum
 
-    def get_tcp_package(self) -> bytes:
+    def __bytes__(self) -> bytes:
         package = 0
         if self.use_ipv6:
             pass
@@ -107,3 +107,8 @@ class TCPPackage:
                          source_addr,
                          dest_addr)
         return ip_header
+
+    @staticmethod
+    # не получается сделать тайпинг на обьект этого класса
+    def parse_tcp_package(raw_data):
+        return TCPPackage()

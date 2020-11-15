@@ -39,7 +39,7 @@ async def main():
     try:
         i = 0
         while i != pings_count:
-            measure = await tcp_ping.do_ping_with_connect()
+            measure = await tcp_ping.do_ping()
             if output_level > 0:
                 print(tcp_ping.prepare_ping_info(measure))
             if delay > measure > 0:
