@@ -86,6 +86,8 @@ class TCPing:
         source_ip = "192.168.0.1"
         source_port = 1234
         dest_ip = socket.gethostbyname(self.destination)
+        if self.ip is None:
+            self.ip = dest_ip
         seq = 0
         ack_seq = 0
         syn_pack = tcp_package.TCPPackage(flags=syn_flags, source_ip=source_ip,
