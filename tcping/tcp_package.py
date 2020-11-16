@@ -17,7 +17,7 @@ class TCPPackage:
                  seq=0,
                  ack_seq=0,
                  ttl=255,
-                 id=54321,
+                 pack_id=54321,
                  use_ipv6=False,
                  data=b''
                  ):
@@ -33,7 +33,7 @@ class TCPPackage:
         self.urg_ptr = 0
         self.ttl = ttl
         # Id of this packet, random number
-        self.id = id
+        self.id = pack_id
         self.use_ipv6 = use_ipv6
         self.data = data
 
@@ -104,17 +104,6 @@ class TCPPackage:
         source_addr = socket.inet_aton(self.source_ip)
         dest_addr = socket.inet_aton(self.dest_ip)
         ihl_version = (version << 4) + ihl
-        # print(ihl_version)
-        # print(tos)
-        # print(tot_len)
-        # print(self.id)
-        # print(frag_off)
-        # print(self.ttl)
-        # print(protocol)
-        # print(check)
-        # print(source_addr)
-        # print(dest_addr)
-        # print()
         ip_header = struct.pack('!BBHHHBBH4s4s', ihl_version, tos, tot_len, self.id, frag_off, self.ttl, protocol,
                                 check,
                                 source_addr,
@@ -122,7 +111,7 @@ class TCPPackage:
         return ip_header
 
     @staticmethod
-    # не получается сделать тайпинг на обьект этого класса
+    # не получается сделать тайпинг на обьект текущего класса
     def parse_tcp_ipv4_package(raw_data):
         package = TCPPackage()
         TCPPackage.parse_ipv4_headers(package, raw_data[:40])
@@ -133,7 +122,6 @@ class TCPPackage:
     def parse_ipv4_headers(tcp_pack, raw_data):
         headers = struct.unpack('!BBHHHBBH4s4sHHLLBBHHH', raw_data)
         # ipv4
-        # в идеале должно писать все это как поля в self
         ihl_version = headers[0]
         tos = headers[1]
         tot_len = headers[2]
@@ -151,18 +139,24 @@ class TCPPackage:
     def parse_tcp_headers(tcp_pack, raw_data):
         headers = struct.unpack('!BBHHHBBH4s4sHHLLBBHHH', raw_data)
         # tcp
-        # tcp_headers = pack('!HHLLBBHHH5H', self.source_port, self.dest_port, self.seq, self.ack_seq, offset_res,
-        #                    tcp_flags,
-        #                    window, self.check, self.urg_ptr, self.data)
         tcp_pack.source_port = headers[10]
         tcp_pack.dest_port = headers[11]
         tcp_pack.seq = headers[12]
         tcp_pack.ack_seq = headers[13]
         tcp_pack.offset_res = headers[14]
         flags = headers[15]
+        tcp_pack.flags["urg"] = flags % 10
+        flags = flags // 10
+        tcp_pack.flags["ack"] = flags % 10
+        flags = flags // 10
+        tcp_pack.flags["psh"] = flags % 10
+        flags = flags // 10
+        tcp_pack.flags["rst"] = flags % 10
+        flags = flags // 10
+        tcp_pack.flags["syn"] = flags % 10
+        flags = flags // 10
+        tcp_pack.flags["fin"] = flags % 10
         tcp_pack.window = socket.ntohs(headers[16])
         tcp_pack.check = headers[17]
         tcp_pack.urg_ptr = headers[18]
-        tcp_pack.data = headers[19:]
-
 
