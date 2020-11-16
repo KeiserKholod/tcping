@@ -67,17 +67,21 @@ class TCPing:
         return measure
 
     def ping_with_raw_socket(self):
+        """Does TCP handshake by raw socket.
+         Return duration of handshake; in case of exception return -1."""
+
         syn_flags = {"fin": 0,
+
                      "syn": 1,
                      "rst": 0,
                      "psh": 0,
                      "ack": 0,
                      "urg": 0}
         ack_flags = {"fin": 0,
-                     "syn": 1,
+                     "syn": 0,
                      "rst": 0,
                      "psh": 0,
-                     "ack": 0,
+                     "ack": 1,
                      "urg": 0}
         source_ip = "192.168.0.1"
         source_port = 1234
@@ -98,11 +102,16 @@ class TCPing:
                 # recive ack
                 while measure.work_time <= self.timeout and response is None:
                     response = sock.recvfrom(4096)[0]
+                    if response is not None:
+                        if not (response[1] == socket.inet_aton(dest_ip)):
+                            response = None
                 if response is None:
                     return -1
-
-                seq += 1
-                ack_seq += 1
+                syn_ack_pack = tcp_package.TCPPackage.parse_tcp_ipv4_package(response)
+                if syn_ack_pack.seq != seq + 1:
+                    return -1
+                seq = syn_ack_pack.seq + 1
+                ack_seq = syn_ack_pack.ack_seq + 1
                 ack_pack = tcp_package.TCPPackage(flags=ack_flags, source_ip=source_ip,
                                                   dest_ip=dest_ip, dest_port=self.port,
                                                   seq=seq, ack_seq=ack_seq,
