@@ -64,17 +64,24 @@ class TCPPackage:
         doff = 5  # 4 bit field, size of tcp header, 5 * 4 = 20 bytes
         offset_res = (doff << 4) + 0
         window = socket.htons(self.window_size)
-        tcp_flags = self.flags["fin"] + \
-                    (self.flags["syn"] << 1) + \
-                    (self.flags["rst"] << 2) + \
-                    (self.flags["psh"] << 3) + \
-                    (self.flags["ack"] << 4) + \
-                    (self.flags["urg"] << 5)
+        tcp_flags = self.flags["fin"] + (
+                self.flags["syn"] << 1) + (
+                            self.flags["rst"] << 2) + (
+                            self.flags["psh"] << 3) + (
+                            self.flags["ack"] << 4) + (
+                            self.flags["urg"] << 5)
 
         # pre-build to calculate checksum
-        tcp_headers = struct.pack('!HHLLBBHHH', self.source_port, self.dest_port, self.seq, self.ack_seq, offset_res,
+        tcp_headers = struct.pack('!HHLLBBHHH',
+                                  self.source_port,
+                                  self.dest_port,
+                                  self.seq,
+                                  self.ack_seq,
+                                  offset_res,
                                   tcp_flags,
-                                  window, self.check, self.urg_ptr)
+                                  window,
+                                  self.check,
+                                  self.urg_ptr)
 
         # pseudo header fields
         source_address = socket.inet_aton(self.source_ip)
@@ -83,14 +90,26 @@ class TCPPackage:
         protocol = socket.IPPROTO_TCP
         tcp_length = len(tcp_headers)
 
-        pseudo_headers = struct.pack('!4s4sBBH', source_address, dest_address, placeholder, protocol, tcp_length)
+        pseudo_headers = struct.pack('!4s4sBBH',
+                                     source_address,
+                                     dest_address,
+                                     placeholder,
+                                     protocol,
+                                     tcp_length)
         pseudo_headers += tcp_headers
 
-        self.check = TCPPackage.calculate_checksum(pseudo_headers.decode("1251"))
+        self.check = TCPPackage \
+            .calculate_checksum(pseudo_headers.decode("1251"))
         # get tcp headers with checksum
-        tcp_headers = struct.pack('!HHLLBBHHH', self.source_port, self.dest_port, self.seq, self.ack_seq, offset_res,
+        tcp_headers = struct.pack('!HHLLBBHHH',
+                                  self.source_port,
+                                  self.dest_port,
+                                  self.seq,
+                                  self.ack_seq,
+                                  offset_res,
                                   tcp_flags,
-                                  window, self.check, self.urg_ptr)
+                                  window, self.check,
+                                  self.urg_ptr)
         return tcp_headers
 
     def get_ipv4_headers(self) -> bytes:
@@ -104,7 +123,14 @@ class TCPPackage:
         source_addr = socket.inet_aton(self.source_ip)
         dest_addr = socket.inet_aton(self.dest_ip)
         ihl_version = (version << 4) + ihl
-        ip_header = struct.pack('!BBHHHBBH4s4s', ihl_version, tos, tot_len, self.id, frag_off, self.ttl, protocol,
+        ip_header = struct.pack('!BBHHHBBH4s4s',
+                                ihl_version,
+                                tos,
+                                tot_len,
+                                self.id,
+                                frag_off,
+                                self.ttl,
+                                protocol,
                                 check,
                                 source_addr,
                                 dest_addr)
@@ -122,14 +148,14 @@ class TCPPackage:
     def parse_ipv4_headers(tcp_pack, raw_data):
         headers = struct.unpack('!BBHHHBBH4s4sHHLLBBHHH', raw_data)
         # ipv4
-        ihl_version = headers[0]
-        tos = headers[1]
-        tot_len = headers[2]
+        # ihl_version = headers[0]
+        # tos = headers[1]
+        # tot_len = headers[2]
         tcp_pack.id = headers[3]
-        frag_off = headers[4]
+        # frag_off = headers[4]
         tcp_pack.ttl = headers[5]
-        protocol = headers[6]
-        check = headers[7]
+        # protocol = headers[6]
+        # check = headers[7]
         source_addr = headers[8]
         tcp_pack.source_ip = socket.inet_ntoa(source_addr)
         dest_addr = headers[9]
@@ -159,4 +185,3 @@ class TCPPackage:
         tcp_pack.window = socket.ntohs(headers[16])
         tcp_pack.check = headers[17]
         tcp_pack.urg_ptr = headers[18]
-

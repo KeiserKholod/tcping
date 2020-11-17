@@ -12,7 +12,9 @@ def create_cmd_parser():
     parser.add_argument('destination', default=None,
                         help='IP, Domain or URL')
     parser.add_argument('-c', '--count', default='-1', dest='pings_count',
-                        help='count of pings, default - works, while would not interrupted by user')
+                        help='count of pings, '
+                             'default -'
+                             ' works, while would not interrupted by user')
     parser.add_argument('-t', '--timeout', default='0', dest='timeout',
                         help='to set timeout')
     parser.add_argument('-p', '--port', default='80', dest='port',
@@ -21,7 +23,9 @@ def create_cmd_parser():
                         help='delay between pings in seconds')
     parser.add_argument('-6', '--ipv6', action='store_true', dest="use_ipv6",
                         help='to use ipv6')
-    parser.add_argument('-o', '--output-level', default='2', dest="output_level",
+    parser.add_argument('-o', '--output-level',
+                        default='2',
+                        dest="output_level",
                         help='0 - only summary statistics; '
                              '1 - write only info for single pings; '
                              '2 - write all; ')
@@ -54,7 +58,9 @@ async def main():
     if output_level in (0, 2):
         if output_level == 2:
             print()
-        stat = statistics.Statistics(tcp_ping.measures, tcp_ping.ip, tcp_ping.port)
+        stat = statistics.Statistics(tcp_ping.measures,
+                                     tcp_ping.ip,
+                                     tcp_ping.port)
         print(stat)
 
 

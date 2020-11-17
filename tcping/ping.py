@@ -13,7 +13,8 @@ class Option(Enum):
 
 class StatisticsData(float):
     """Contains information about ping duration, destination ip and port
-    in case of exception in ping, time equals -1 and field is_failed equals True."""
+    in case of exception in ping,
+     time equals -1 and field is_failed equals True."""
 
     def __init__(self, time: float, ip: str, port: int):
         super().__init__()
@@ -90,12 +91,17 @@ class TCPing:
             self.ip = dest_ip
         seq = 0
         ack_seq = 0
-        syn_pack = tcp_package.TCPPackage(flags=syn_flags, source_ip=source_ip,
-                                          dest_ip=dest_ip, dest_port=self.port,
-                                          seq=seq, ack_seq=ack_seq,
+        syn_pack = tcp_package.TCPPackage(flags=syn_flags,
+                                          source_ip=source_ip,
+                                          dest_ip=dest_ip,
+                                          dest_port=self.port,
+                                          seq=seq,
+                                          ack_seq=ack_seq,
                                           source_port=source_port).__bytes__()
         try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_TCP)
+            sock = socket.socket(socket.AF_INET,
+                                 socket.SOCK_RAW,
+                                 socket.IPPROTO_TCP)
             sock.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
             with TimeMeasure() as measure:
                 # send syn
@@ -109,15 +115,21 @@ class TCPing:
                             response = None
                 if response is None:
                     return -1
-                syn_ack_pack = tcp_package.TCPPackage.parse_tcp_ipv4_package(response)
+                syn_ack_pack = tcp_package \
+                    .TCPPackage \
+                    .parse_tcp_ipv4_package(response)
                 if syn_ack_pack.seq != seq + 1:
                     return -1
                 seq = syn_ack_pack.seq + 1
                 ack_seq = syn_ack_pack.ack_seq + 1
-                ack_pack = tcp_package.TCPPackage(flags=ack_flags, source_ip=source_ip,
-                                                  dest_ip=dest_ip, dest_port=self.port,
-                                                  seq=seq, ack_seq=ack_seq,
-                                                  source_port=source_port).__bytes__()
+                ack_pack = tcp_package \
+                    .TCPPackage(flags=ack_flags,
+                                source_ip=source_ip,
+                                dest_ip=dest_ip,
+                                dest_port=self.port,
+                                seq=seq,
+                                ack_seq=ack_seq,
+                                source_port=source_port).__bytes__()
                 sock.sendto(ack_pack, (dest_ip, self.port))
             return measure.work_time
         except (socket.gaierror, socket.herror):
@@ -155,8 +167,10 @@ class TCPing:
          destination ip and por and status of a single ping"""
 
         if stat_data.is_failed:
-            return 'From: [{}:{}]; Failed;'.format(str(stat_data.ip),
-                                                   str(stat_data.port))
-        return 'From: [{}:{}]; Time: {}ms;'.format(str(stat_data.ip),
-                                                   str(stat_data.port),
-                                                   str(round(stat_data * 1000, 3)))
+            return 'From: [{}:{}]; Failed;' \
+                .format(str(stat_data.ip),
+                        str(stat_data.port))
+        return 'From: [{}:{}]; Time: {}ms;' \
+            .format(str(stat_data.ip),
+                    str(stat_data.port),
+                    str(round(stat_data * 1000, 3)))

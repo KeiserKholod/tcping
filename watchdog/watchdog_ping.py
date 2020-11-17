@@ -16,7 +16,8 @@ class WatchdogPingData:
 
     @staticmethod
     def parse_destinations(raw_destinations):
-        """Method, parse from group of strings lke 'domain_or_port:[port]' and return tuple."""
+        """Method, parse from group of strings lke
+         'domain_or_port:[port]' and return tuple."""
 
         destinations_result = []
         for destination in raw_destinations:
@@ -31,12 +32,15 @@ class WatchdogPingData:
         return destinations_result
 
     def get_pings(self):
-        """Method, make ping objects from destinations and return list of pings."""
+        """Method, make ping objects from destinations
+         and return list of pings."""
 
         pings = []
         for destination in self.destinations:
-            wd_ping = ping.TCPing(destination=destination[0], port=destination[1],
-                                  timeout=self.timeout, use_ipv6=self.use_ipv6)
+            wd_ping = ping.TCPing(destination=destination[0],
+                                  port=destination[1],
+                                  timeout=self.timeout,
+                                  use_ipv6=self.use_ipv6)
             pings.append(wd_ping)
         return pings
 
@@ -46,13 +50,14 @@ class WatchdogPingData:
         Return list of asyncio tasks from ping.do_ping() method."""
 
         tasks = []
-        for ping in pings:
-            tasks.append(ioloop.create_task(ping.do_ping()))
+        for one_ping in pings:
+            tasks.append(ioloop.create_task(one_ping.do_ping()))
         return tasks
 
     @staticmethod
     def get_max_and_min_time(measures_with_destinations):
-        """Method, returns maximum and minimum time of group of measures + destinations tuples."""
+        """Method, returns maximum and minimum time
+         of group of measures + destinations tuples."""
 
         max = 0
         min = float("inf")
@@ -66,10 +71,14 @@ class WatchdogPingData:
     @staticmethod
     def get_measures_to_print(meaures):
         """Method, takes list of tuples (measure, destination) and
-         return table with information about time, ip and port status for group of measures."""
+         return table with information about
+          time, ip and port status for group of measures."""
 
         table = PrettyTable()
-        table.field_names = ['destination', 'ip', 'port', 'time ms', 'condition']
+        table.field_names = ['destination',
+                             'ip', 'port',
+                             'time ms',
+                             'condition']
         for measure_with_destination in meaures:
             destination = measure_with_destination[1]
             port = measure_with_destination[0].port

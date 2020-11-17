@@ -89,11 +89,12 @@ class Statistics:
         return "Statistic tcping for [{}:{}]:\n" \
                "Pings count: {}, Successful: {}, Failed: {}\n" \
                "Fails percentage: {}\n" \
-               "Max time: {}ms, Min time: {}ms, Average time {}ms\n".format(self.__ip, self.__port,
-                                                                            self.benchmarks_count,
-                                                                            self.successful_pings_count,
-                                                                            self.failed_pings_count,
-                                                                            round(self.looses_percentage, 3),
-                                                                            round(self.max_time, 3),
-                                                                            round(self.min_time, 3),
-                                                                            round(self.average_time, 3))
+               "Max time: {}ms, Min time: {}ms, Average time {}ms\n" \
+            .format(self.__ip, self.__port,
+                    self.benchmarks_count,
+                    self.successful_pings_count,
+                    self.failed_pings_count,
+                    round(self.looses_percentage, 3),
+                    round(self.max_time, 3),
+                    round(self.min_time, 3),
+                    round(self.average_time, 3))
