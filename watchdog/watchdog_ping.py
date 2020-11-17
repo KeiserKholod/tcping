@@ -7,15 +7,15 @@ class WatchdogPingData:
     """Contains methods  to get asyncio tasks, group of Ping objects and
      table with information about group of pings."""
 
-    def __init__(self, destinations=[],
-                 timeout=0,
-                 use_ipv6=False):
+    def __init__(self, destinations: list = [],
+                 timeout: int = 0,
+                 use_ipv6: bool = False):
         self.destinations = destinations
         self.timeout = timeout
         self.use_ipv6 = use_ipv6
 
     @staticmethod
-    def parse_destinations(raw_destinations):
+    def parse_destinations(raw_destinations: list) -> list:
         """Method, parse from group of strings lke
          'domain_or_port:[port]' and return tuple."""
 
@@ -31,7 +31,7 @@ class WatchdogPingData:
                 destinations_result.append((parts[0], "80"))
         return destinations_result
 
-    def get_pings(self):
+    def get_pings(self) -> list:
         """Method, make ping objects from destinations
          and return list of pings."""
 
@@ -45,7 +45,7 @@ class WatchdogPingData:
         return pings
 
     @staticmethod
-    def create_tasks_from_pings(pings, ioloop):
+    def create_tasks_from_pings(pings: list, ioloop) -> list:
         """Static method, takes list of ping objects and asyncio loop.
         Return list of asyncio tasks from ping.do_ping() method."""
 
@@ -55,7 +55,7 @@ class WatchdogPingData:
         return tasks
 
     @staticmethod
-    def get_max_and_min_time(measures_with_destinations):
+    def get_max_and_min_time(measures_with_destinations: list) -> tuple:
         """Method, returns maximum and minimum time
          of group of measures + destinations tuples."""
 
@@ -69,7 +69,7 @@ class WatchdogPingData:
         return max, min
 
     @staticmethod
-    def get_measures_to_print(meaures):
+    def get_measures_to_print(meaures: list) -> PrettyTable:
         """Method, takes list of tuples (measure, destination) and
          return table with information about
           time, ip and port status for group of measures."""
