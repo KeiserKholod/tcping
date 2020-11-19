@@ -11,7 +11,7 @@ class TCPPackage:
                                       "urg": 0},
                  source_ip: str = "127.0.0.1",
                  dest_ip: str = "87.250.250.242",
-                 source_port: int = 1234,
+                 source_port: int = 0,
                  dest_port: int = 80,
                  window_size: int = 5840,
                  seq: int = 0,
