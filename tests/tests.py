@@ -3,6 +3,7 @@ from tcping import ping
 from tcping import __main__ as tcping
 from tcping import errors
 from tcping import statistics
+from tcping import tcp_package
 from watchdog import watchdog_ping
 
 
@@ -260,6 +261,45 @@ class TestWatchdog(unittest.TestCase):
             .get_max_and_min_time(measures_with_dest)
         self.assertEqual(max, 0.059)
         self.assertEqual(min, -1)
+
+
+class TestTCPPackage(unittest.TestCase):
+    expected_headers_ipv4 = b'E\x00\x00(\xd41\x00\x00' + \
+                            b'\xff\x06\x00\n\x7f\x00\x00\x01{{{{'
+    expected_headers_tcp = b'\x00\x00\x01\xbb\x00' + \
+                           b'\x00\x00\x19\x00\x00' + \
+                           b'\x004P\x10\xd0\x16\x17\xbb\x00\x00'
+
+    def test_compilating_ipv4_headers(self):
+        pack = tcp_package.TCPPackage(flags=tcp_package.TCPPackageType.SYN,
+                                      source_ip="127.0.0.1",
+                                      dest_ip="123.123.123.123",
+                                      dest_port=443,
+                                      seq=25,
+                                      ack_seq=52)
+        ipv4_headers = pack.get_ipv4_headers()
+        self.assertEqual(self.expected_headers_ipv4, ipv4_headers)
+
+    def test_compilating_tcp_headers(self):
+        pack = tcp_package.TCPPackage(flags=tcp_package.TCPPackageType.SYN,
+                                      source_ip="127.0.0.1",
+                                      dest_ip="123.123.123.123",
+                                      dest_port=443,
+                                      seq=25,
+                                      ack_seq=52)
+        tcp_headers = pack.get_tcp_headers()
+        self.assertEqual(self.expected_headers_tcp, tcp_headers)
+
+    def test_compilating_tcp_package(self):
+        pack = tcp_package.TCPPackage(flags=tcp_package.TCPPackageType.SYN,
+                                      source_ip="127.0.0.1",
+                                      dest_ip="123.123.123.123",
+                                      dest_port=443,
+                                      seq=25,
+                                      ack_seq=52)
+        tcp_pack = pack.__bytes__()
+        self.assertEqual(self.expected_headers_ipv4 +
+                         self.expected_headers_tcp, tcp_pack)
 
 
 if __name__ == '__main__':
