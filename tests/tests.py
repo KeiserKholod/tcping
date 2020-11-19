@@ -1,8 +1,8 @@
 import unittest
 from tcping import ping
-from tcping import statistics
 from tcping import __main__ as tcping
 from tcping import errors
+from tcping import statistics
 from watchdog import watchdog_ping
 
 
