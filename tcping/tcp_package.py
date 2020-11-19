@@ -1,14 +1,19 @@
 import struct
 import socket
+import enum
+
+
+class TCPPackageType(enum.IntFlag):
+    URG = 1
+    ACK = 2
+    PSH = 4
+    RST = 8
+    SYN = 16
+    FIN = 32
 
 
 class TCPPackage:
-    def __init__(self, flags: dict = {"fin": 0,
-                                      "syn": 1,
-                                      "rst": 0,
-                                      "psh": 0,
-                                      "ack": 0,
-                                      "urg": 0},
+    def __init__(self, flags: TCPPackageType = TCPPackageType.SYN,
                  source_ip: str = "127.0.0.1",
                  dest_ip: str = "87.250.250.242",
                  source_port: int = 0,
@@ -64,13 +69,7 @@ class TCPPackage:
         doff = 5  # 4 bit field, size of tcp header, 5 * 4 = 20 bytes
         offset_res = (doff << 4) + 0
         window = socket.htons(self.window_size)
-        tcp_flags = self.flags["fin"] + (
-                self.flags["syn"] << 1) + (
-                            self.flags["rst"] << 2) + (
-                            self.flags["psh"] << 3) + (
-                            self.flags["ack"] << 4) + (
-                            self.flags["urg"] << 5)
-
+        tcp_flags = self.flags
         # pre-build to calculate checksum
         tcp_headers = struct.pack('!HHLLBBHHH',
                                   self.source_port,
@@ -170,18 +169,7 @@ class TCPPackage:
         tcp_pack.seq = headers[12]
         tcp_pack.ack_seq = headers[13]
         tcp_pack.offset_res = headers[14]
-        flags = headers[15]
-        tcp_pack.flags["urg"] = flags % 10
-        flags = flags // 10
-        tcp_pack.flags["ack"] = flags % 10
-        flags = flags // 10
-        tcp_pack.flags["psh"] = flags % 10
-        flags = flags // 10
-        tcp_pack.flags["rst"] = flags % 10
-        flags = flags // 10
-        tcp_pack.flags["syn"] = flags % 10
-        flags = flags // 10
-        tcp_pack.flags["fin"] = flags % 10
+        tcp_pack.flags = headers[15]
         tcp_pack.window = socket.ntohs(headers[16])
         tcp_pack.check = headers[17]
         tcp_pack.urg_ptr = headers[18]

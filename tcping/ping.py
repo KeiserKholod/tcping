@@ -73,19 +73,6 @@ class TCPing:
         """Does TCP handshake by raw socket.
          Return duration of handshake; in case of exception return -1."""
 
-        syn_flags = {"fin": 0,
-
-                     "syn": 1,
-                     "rst": 0,
-                     "psh": 0,
-                     "ack": 0,
-                     "urg": 0}
-        ack_flags = {"fin": 0,
-                     "syn": 0,
-                     "rst": 0,
-                     "psh": 0,
-                     "ack": 1,
-                     "urg": 0}
         source_ip: str = "192.168.0.1"
         source_port: int = 0
         dest_ip: str = socket.gethostbyname(self.destination)
@@ -93,7 +80,7 @@ class TCPing:
             self.ip = dest_ip
         seq: int = 0
         ack_seq: int = 0
-        syn_pack = tcp_package.TCPPackage(flags=syn_flags,
+        syn_pack = tcp_package.TCPPackage(flags=tcp_package.TCPPackageType.SYN,
                                           source_ip=source_ip,
                                           dest_ip=dest_ip,
                                           dest_port=self.port,
