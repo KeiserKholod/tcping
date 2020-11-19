@@ -17,7 +17,8 @@ def create_cmd_parser():
                         help='delay between pings in seconds')
     parser.add_argument('-6', '--ipv6', action='store_true', dest="use_ipv6",
                         help='to use ipv6')
-    parser.add_argument('-o', '--output-level', default='2', dest="output_level",
+    parser.add_argument('-o', '--output-level', default='2',
+                        dest="output_level",
                         help='0 - only summary statistics; '
                              '1 - write only info for single pings; '
                              '2 - write all; ')
@@ -33,13 +34,18 @@ def show_watchdog_tui(screen):
     else:
         last_info = ""
         try:
-            destinations = watchdog_ping.WatchdogPingData.parse_destinations(args.destinations)
-            watchdog_ping_data = watchdog_ping.WatchdogPingData(destinations=destinations,
-                                                                timeout=args.timeout, use_ipv6=args.use_ipv6)
+            destinations = watchdog_ping \
+                .WatchdogPingData \
+                .parse_destinations(args.destinations)
+            watchdog_ping_data = watchdog_ping \
+                .WatchdogPingData(destinations=destinations,
+                                  timeout=args.timeout,
+                                  use_ipv6=args.use_ipv6)
             delay = float(args.delay)
             pings = watchdog_ping_data.get_pings()
             while True:
-                tasks = watchdog_ping.WatchdogPingData.create_tasks_from_pings(pings, ioloop)
+                tasks = watchdog_ping \
+                    .WatchdogPingData.create_tasks_from_pings(pings, ioloop)
                 wait_tasks = asyncio.wait(tasks)
                 done, pending = ioloop.run_until_complete(wait_tasks)
                 count = 0
@@ -48,13 +54,16 @@ def show_watchdog_tui(screen):
                     count = 0
                     for task in tasks:
                         if task in done:
-                            measures.append((task.result(), pings[count].destination))
+                            measures.append((task.result(),
+                                             pings[count].destination))
                             count += 1
                         else:
                             count = 0
                             measures = []
 
-                table = watchdog_ping.WatchdogPingData.get_measures_to_print(measures)
+                table = watchdog_ping \
+                    .WatchdogPingData \
+                    .get_measures_to_print(measures)
                 screen.clear()
                 last_info = table.__str__()
                 lines = table.__str__().split("\n")
@@ -66,7 +75,9 @@ def show_watchdog_tui(screen):
                 if ev in (ord('Q'), ord('q')):
                     return
                 screen.refresh()
-                max_time, min_time = watchdog_ping.WatchdogPingData.get_max_and_min_time(measures)
+                max_time, min_time = watchdog_ping \
+                    .WatchdogPingData \
+                    .get_max_and_min_time(measures)
                 if max_time < delay and min_time > 0:
                     time.sleep(delay - max_time)
         except errors.PingError as e:
