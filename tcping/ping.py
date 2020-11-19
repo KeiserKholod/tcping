@@ -7,7 +7,7 @@ import tcping.tcp_package as tcp_package
 from typing import Optional
 
 
-class Option(Enum):
+class ConnectionType(Enum):
     CONNECT = 1
     RAW_SOCKET = 2
 
@@ -58,9 +58,9 @@ class TCPing:
         self.use_ipv6: bool = use_ipv6
         self.measures = []
 
-    async def do_ping(self, option: Option = Option.CONNECT) -> list:
+    def do_ping(self, option: ConnectionType = ConnectionType.CONNECT) -> StatisticsData:
         """Do one ping and return StatisticsData object."""
-        if option == Option.CONNECT:
+        if option == ConnectionType.CONNECT:
             work_time = self.ping_with_connect()
         else:
             work_time = 0

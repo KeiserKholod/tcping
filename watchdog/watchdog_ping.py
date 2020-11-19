@@ -4,11 +4,12 @@ from prettytable import PrettyTable
 
 
 class WatchdogPingData:
-    """Contains methods  to get asyncio tasks, group of Ping objects and
-     table with information about group of pings."""
+    """Contains methods  to get asyncio tasks,
+     group of Ping objects and
+         table with information about group of pings."""
 
     def __init__(self, destinations: list = [],
-                 timeout: int = 0,
+                 timeout: float = 0,
                  use_ipv6: bool = False):
         self.destinations = destinations
         self.timeout = timeout
@@ -17,7 +18,7 @@ class WatchdogPingData:
     @staticmethod
     def parse_destinations(raw_destinations: list) -> list:
         """Method, parse from group of strings lke
-         'domain_or_port:[port]' and return tuple."""
+                'domain_or_port:[port]' and return tuple."""
 
         destinations_result = []
         for destination in raw_destinations:
@@ -37,22 +38,10 @@ class WatchdogPingData:
 
         pings = []
         for destination in self.destinations:
-            wd_ping = ping.TCPing(destination=destination[0],
-                                  port=destination[1],
-                                  timeout=self.timeout,
-                                  use_ipv6=self.use_ipv6)
+            wd_ping = ping.TCPing(destination=destination[0], port=destination[1],
+                                  timeout=self.timeout, use_ipv6=self.use_ipv6)
             pings.append(wd_ping)
         return pings
-
-    @staticmethod
-    def create_tasks_from_pings(pings: list, ioloop) -> list:
-        """Static method, takes list of ping objects and asyncio loop.
-        Return list of asyncio tasks from ping.do_ping() method."""
-
-        tasks = []
-        for one_ping in pings:
-            tasks.append(ioloop.create_task(one_ping.do_ping()))
-        return tasks
 
     @staticmethod
     def get_max_and_min_time(measures_with_destinations: list) -> tuple:
@@ -71,14 +60,11 @@ class WatchdogPingData:
     @staticmethod
     def get_measures_to_print(meaures: list) -> PrettyTable:
         """Method, takes list of tuples (measure, destination) and
-         return table with information about
-          time, ip and port status for group of measures."""
+                 return table with information about
+                  time, ip and port status for group of measures."""
 
         table = PrettyTable()
-        table.field_names = ['destination',
-                             'ip', 'port',
-                             'time ms',
-                             'condition']
+        table.field_names = ['destination', 'ip', 'port', 'time ms', 'condition']
         for measure_with_destination in meaures:
             destination = measure_with_destination[1]
             port = measure_with_destination[0].port
