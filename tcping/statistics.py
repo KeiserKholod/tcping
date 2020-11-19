@@ -5,7 +5,7 @@ class Statistics:
     """Contains methods and properties for get statistics about group of pings.
      Use StatisticsData objects."""
 
-    def __init__(self, all_measures, ip, port):
+    def __init__(self, all_measures: list, ip: str, port: int):
         if len(all_measures) == 0:
             raise errors.StatisticsError
         self.__all_statistics_data = all_measures

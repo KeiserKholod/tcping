@@ -3,23 +3,23 @@ import socket
 
 
 class TCPPackage:
-    def __init__(self, flags={"fin": 0,
-                              "syn": 1,
-                              "rst": 0,
-                              "psh": 0,
-                              "ack": 0,
-                              "urg": 0},
-                 source_ip="127.0.0.1",
-                 dest_ip="87.250.250.242",
-                 source_port=1234,
-                 dest_port=80,
-                 window_size=5840,
-                 seq=0,
-                 ack_seq=0,
-                 ttl=255,
-                 pack_id=54321,
-                 use_ipv6=False,
-                 data=b''
+    def __init__(self, flags: dict = {"fin": 0,
+                                      "syn": 1,
+                                      "rst": 0,
+                                      "psh": 0,
+                                      "ack": 0,
+                                      "urg": 0},
+                 source_ip: str = "127.0.0.1",
+                 dest_ip: str = "87.250.250.242",
+                 source_port: int = 1234,
+                 dest_port: int = 80,
+                 window_size: int = 5840,
+                 seq: int = 0,
+                 ack_seq: int = 0,
+                 ttl: int = 255,
+                 pack_id: int = 54321,
+                 use_ipv6: bool = False,
+                 data: bytes = b''
                  ):
         self.flags = flags
         self.source_ip = source_ip
@@ -39,7 +39,7 @@ class TCPPackage:
 
     # checksum functions needed for calculation checksum
     @staticmethod
-    def calculate_checksum(message) -> int:
+    def calculate_checksum(message: str) -> int:
         sum = 0
         # loop taking 2 characters at a time
         for i in range(0, len(message), 2):
@@ -145,7 +145,7 @@ class TCPPackage:
         return package
 
     @staticmethod
-    def parse_ipv4_headers(tcp_pack, raw_data):
+    def parse_ipv4_headers(tcp_pack, raw_data: bytes):
         headers = struct.unpack('!BBHHHBBH4s4sHHLLBBHHH', raw_data)
         # ipv4
         # ihl_version = headers[0]
@@ -162,7 +162,7 @@ class TCPPackage:
         tcp_pack.dest_ip = socket.inet_ntoa(dest_addr)
 
     @staticmethod
-    def parse_tcp_headers(tcp_pack, raw_data):
+    def parse_tcp_headers(tcp_pack, raw_data: bytes):
         headers = struct.unpack('!BBHHHBBH4s4sHHLLBBHHH', raw_data)
         # tcp
         tcp_pack.source_port = headers[10]

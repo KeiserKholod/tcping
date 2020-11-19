@@ -4,6 +4,7 @@ from tcping import errors
 import time
 from enum import Enum
 import tcping.tcp_package as tcp_package
+from typing import Optional
 
 
 class Option(Enum):
@@ -46,18 +47,18 @@ class TCPing:
     """Contains methods to do async ping and get info about ping."""
 
     def __init__(self,
-                 destination=None,
-                 port=80,
-                 timeout=0,
-                 use_ipv6=False):
+                 destination: Optional[str] = None,
+                 port: int = 80,
+                 timeout: float = 0,
+                 use_ipv6: bool = False):
         self.destination = destination
         self.port = int(port)
         self.timeout = float(timeout)
         self.ip = None
-        self.use_ipv6 = use_ipv6
+        self.use_ipv6: bool = use_ipv6
         self.measures = []
 
-    async def do_ping(self, option=Option.CONNECT):
+    async def do_ping(self, option: Option = Option.CONNECT) -> list:
         """Do one ping and return StatisticsData object."""
         if option == Option.CONNECT:
             work_time = self.ping_with_connect()
@@ -67,7 +68,7 @@ class TCPing:
         self.measures.append(measure)
         return measure
 
-    def ping_with_raw_socket(self):
+    def ping_with_raw_socket(self) -> float:
         """Does TCP handshake by raw socket.
          Return duration of handshake; in case of exception return -1."""
 
@@ -84,13 +85,13 @@ class TCPing:
                      "psh": 0,
                      "ack": 1,
                      "urg": 0}
-        source_ip = "192.168.0.1"
-        source_port = 1234
-        dest_ip = socket.gethostbyname(self.destination)
+        source_ip: str = "192.168.0.1"
+        source_port: int = 1234
+        dest_ip: str = socket.gethostbyname(self.destination)
         if self.ip is None:
             self.ip = dest_ip
-        seq = 0
-        ack_seq = 0
+        seq: int = 0
+        ack_seq: int = 0
         syn_pack = tcp_package.TCPPackage(flags=syn_flags,
                                           source_ip=source_ip,
                                           dest_ip=dest_ip,
