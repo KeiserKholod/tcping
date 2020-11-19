@@ -1,0 +1,10 @@
+[tool.coverage.run]
+source = ["tcping"]
+omit = ["*/__main__.py", "venv/*", "setup.py", "./pytest_cache/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+skip_empty = true
+sort = "-Miss"
+fail_under = 75
