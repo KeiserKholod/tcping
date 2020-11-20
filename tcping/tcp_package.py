@@ -135,4 +135,41 @@ class TCPPackage:
                                 dest_addr)
         return ip_header
 
+    @staticmethod
+    # не получается сделать тайпинг на обьект текущего класса
+    def parse_tcp_ipv4_package(raw_data):
+        package = TCPPackage()
+        TCPPackage.parse_ipv4_headers(package, raw_data[:40])
+        TCPPackage.parse_tcp_headers(package, raw_data[:40])
+        return package
 
+    @staticmethod
+    def parse_ipv4_headers(tcp_pack, raw_data: bytes):
+        headers = struct.unpack('!BBHHHBBH4s4sHHLLBBHHH', raw_data)
+        # ipv4
+        # ihl_version = headers[0]
+        # tos = headers[1]
+        # tot_len = headers[2]
+        tcp_pack.id = headers[3]
+        # frag_off = headers[4]
+        tcp_pack.ttl = headers[5]
+        # protocol = headers[6]
+        # check = headers[7]
+        source_addr = headers[8]
+        tcp_pack.source_ip = socket.inet_ntoa(source_addr)
+        dest_addr = headers[9]
+        tcp_pack.dest_ip = socket.inet_ntoa(dest_addr)
+
+    @staticmethod
+    def parse_tcp_headers(tcp_pack, raw_data: bytes):
+        headers = struct.unpack('!BBHHHBBH4s4sHHLLBBHHH', raw_data)
+        # tcp
+        tcp_pack.source_port = headers[10]
+        tcp_pack.dest_port = headers[11]
+        tcp_pack.seq = headers[12]
+        tcp_pack.ack_seq = headers[13]
+        tcp_pack.offset_res = headers[14]
+        tcp_pack.flags = headers[15]
+        tcp_pack.window = socket.ntohs(headers[16])
+        tcp_pack.check = headers[17]
+        tcp_pack.urg_ptr = headers[18]
