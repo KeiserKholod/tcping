@@ -1,9 +1,11 @@
 from watchdog import watchdog_ping
 import argparse
 from tcping import errors
+from tcping import ping
 import logging
 import time
 from asciimatics.screen import Screen
+from concurrent.futures import ProcessPoolExecutor
 
 
 def create_cmd_parser():
@@ -42,14 +44,19 @@ def show_watchdog_tui(screen):
             delay = float(args.delay)
             pings = watchdog_ping_data.get_pings()
             while True:
-                measures = []
-                for tcp_ping in pings:
-                    measure = tcp_ping.do_ping()
+                measures_to_print = []
+                futures = []
+                with ProcessPoolExecutor(max_workers=2) as executor:
+                    for tcp_ping in pings:
+                        future = executor.submit(ping.TCPing.do_ping, tcp_ping)
+                        futures.append(future)
+                measures = [future.result() for future in futures]
+                for measure in measures:
                     measure_with_destination = measure, tcp_ping.destination
-                    measures.append(measure_with_destination)
+                    measures_to_print.append(measure_with_destination)
                 table = watchdog_ping \
                     .WatchdogPingData \
-                    .get_measures_to_print(measures)
+                    .get_measures_to_print(measures_to_print)
                 screen.clear()
                 last_info = table.__str__()
                 lines = table.__str__().split("\n")
@@ -63,7 +70,7 @@ def show_watchdog_tui(screen):
                 screen.refresh()
                 max_time, min_time = watchdog_ping \
                     .WatchdogPingData \
-                    .get_max_and_min_time(measures)
+                    .get_max_and_min_time(measures_to_print)
                 if max_time < delay and min_time > 0:
                     time.sleep(delay - max_time)
         except errors.PingError as e:
