@@ -1,10 +1,13 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
 
-setup(name='tcping',
-      version='1.0',
-      description='like ping but with tcp',
-      author='Kholod Dimitry kb-201',
-      author_email='qwerty@ytrewq.net',
-      url='qwerty.ytrewq',
-      packages=['tcping']
+with open("requirements.txt") as f:
+    requirements = [x.strip() for x in f]
+
+setup(name='tcp_ping',
+      version='1.3',
+      description='Like ping, but with tcp.',
+      packages=find_packages(),
+      test_suite='tests',
+      install_requires=requirements,
+      python_requires=">=3.8",
       )

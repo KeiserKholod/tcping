@@ -7,7 +7,7 @@ import tcping.tcp_package as tcp_package
 from typing import Optional
 
 
-class Option(Enum):
+class ConnectionType(Enum):
     CONNECT = 1
     RAW_SOCKET = 2
 
@@ -58,12 +58,13 @@ class TCPing:
         self.use_ipv6: bool = use_ipv6
         self.measures = []
 
-    async def do_ping(self, option: Option = Option.CONNECT) -> list:
+    def do_ping(self, option=ConnectionType.CONNECT) -> StatisticsData:
         """Do one ping and return StatisticsData object."""
-        if option == Option.CONNECT:
+
+        if option == ConnectionType.CONNECT:
             work_time = self.ping_with_connect()
         else:
-            work_time = 0
+            work_time = self.ping_with_raw_socket()
         measure = StatisticsData(work_time, ip=self.ip, port=self.port)
         self.measures.append(measure)
         return measure
@@ -72,27 +73,14 @@ class TCPing:
         """Does TCP handshake by raw socket.
          Return duration of handshake; in case of exception return -1."""
 
-        syn_flags = {"fin": 0,
-
-                     "syn": 1,
-                     "rst": 0,
-                     "psh": 0,
-                     "ack": 0,
-                     "urg": 0}
-        ack_flags = {"fin": 0,
-                     "syn": 0,
-                     "rst": 0,
-                     "psh": 0,
-                     "ack": 1,
-                     "urg": 0}
         source_ip: str = "192.168.0.1"
-        source_port: int = 1234
+        source_port: int = 0
         dest_ip: str = socket.gethostbyname(self.destination)
         if self.ip is None:
             self.ip = dest_ip
         seq: int = 0
         ack_seq: int = 0
-        syn_pack = tcp_package.TCPPackage(flags=syn_flags,
+        syn_pack = tcp_package.TCPPackage(flags=tcp_package.TCPPackageType.SYN,
                                           source_ip=source_ip,
                                           dest_ip=dest_ip,
                                           dest_port=self.port,
@@ -104,6 +92,7 @@ class TCPing:
                                  socket.SOCK_RAW,
                                  socket.IPPROTO_TCP)
             sock.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+            sock.settimeout(self.timeout)
             with TimeMeasure() as measure:
                 # send syn
                 sock.sendto(syn_pack, (dest_ip, self.port))
@@ -121,17 +110,6 @@ class TCPing:
                     .parse_tcp_ipv4_package(response)
                 if syn_ack_pack.seq != seq + 1:
                     return -1
-                seq = syn_ack_pack.seq + 1
-                ack_seq = syn_ack_pack.ack_seq + 1
-                ack_pack = tcp_package \
-                    .TCPPackage(flags=ack_flags,
-                                source_ip=source_ip,
-                                dest_ip=dest_ip,
-                                dest_port=self.port,
-                                seq=seq,
-                                ack_seq=ack_seq,
-                                source_port=source_port).__bytes__()
-                sock.sendto(ack_pack, (dest_ip, self.port))
             return measure.work_time
         except (socket.gaierror, socket.herror):
             raise errors.InvalidIpOrDomain
