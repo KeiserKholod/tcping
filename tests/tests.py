@@ -1,45 +1,55 @@
 import unittest
+from unittest import mock
 from tcping import ping
 from tcping import __main__ as tcping
 from tcping import errors
 from tcping import statistics
 from tcping import tcp_package
 from watchdog import watchdog_ping
+from unittest import mock
 
 
 class TestCorrectPings(unittest.TestCase):
     def test_ping_domain_standart(self):
-        cmd_parser = tcping.create_cmd_parser()
-        args = cmd_parser.parse_args(['google.com'])
-        tcp_ping = ping.TCPing(destination=args.destination, port=args.port,
-                               timeout=args.timeout, use_ipv6=args.use_ipv6)
-        tcp_ping.do_ping()
+        with mock.patch('socket.socket') as mock_socket:
+            mock_socket.return_value.recv.return_value = b""
+            cmd_parser = tcping.create_cmd_parser()
+            args = cmd_parser.parse_args(['google.com'])
+            tcp_ping = ping.TCPing(destination=args.destination, port=args.port,
+                                   timeout=args.timeout, use_ipv6=args.use_ipv6)
+            tcp_ping.do_ping()
         self.assertEqual(len(tcp_ping.measures), 1)
 
     def test_ping_domain_incorrect(self):
-        cmd_parser = tcping.create_cmd_parser()
-        args = cmd_parser.parse_args(['google.csom'])
-        tcp_ping = ping.TCPing(destination=args.destination, port=args.port,
-                               timeout=args.timeout, use_ipv6=args.use_ipv6)
+        with mock.patch('socket.socket') as mock_socket:
+            mock_socket.return_value.recv.return_value = b""
+            cmd_parser = tcping.create_cmd_parser()
+            args = cmd_parser.parse_args(['google.csom'])
+            tcp_ping = ping.TCPing(destination=args.destination, port=args.port,
+                                   timeout=args.timeout, use_ipv6=args.use_ipv6)
 
-        with self.assertRaises(errors.InvalidIpOrDomain):
-            tcp_ping.do_ping()
+            with self.assertRaises(errors.InvalidIpOrDomain):
+                tcp_ping.do_ping()
 
     def test_ping_ip_standart(self):
-        cmd_parser = tcping.create_cmd_parser()
-        args = cmd_parser.parse_args(['64.233.165.101', '-c', '10'])
-        tcp_ping = ping.TCPing(destination=args.destination, port=args.port,
-                               timeout=args.timeout, use_ipv6=args.use_ipv6)
-        tcp_ping.do_ping()
+        with mock.patch('socket.socket') as mock_socket:
+            mock_socket.return_value.recv.return_value = b""
+            cmd_parser = tcping.create_cmd_parser()
+            args = cmd_parser.parse_args(['64.233.165.101', '-c', '10'])
+            tcp_ping = ping.TCPing(destination=args.destination, port=args.port,
+                                   timeout=args.timeout, use_ipv6=args.use_ipv6)
+            tcp_ping.do_ping()
         self.assertEqual(len(tcp_ping.measures), 1)
 
     def test_ping_ip_incorrect(self):
-        cmd_parser = tcping.create_cmd_parser()
-        args = cmd_parser.parse_args(['64.233.165.101.123.214'])
-        tcp_ping = ping.TCPing(destination=args.destination, port=args.port,
-                               timeout=args.timeout, use_ipv6=args.use_ipv6)
-        with self.assertRaises(errors.InvalidIpOrDomain):
-            tcp_ping.do_ping()
+        with mock.patch('socket.socket') as mock_socket:
+            mock_socket.return_value.recv.return_value = b""
+            cmd_parser = tcping.create_cmd_parser()
+            args = cmd_parser.parse_args(['64.233.165.101.123.214'])
+            tcp_ping = ping.TCPing(destination=args.destination, port=args.port,
+                                   timeout=args.timeout, use_ipv6=args.use_ipv6)
+            with self.assertRaises(errors.InvalidIpOrDomain):
+                tcp_ping.do_ping()
 
 
 class TestParsing(unittest.TestCase):
@@ -300,6 +310,17 @@ class TestTCPPackage(unittest.TestCase):
         tcp_pack = pack.__bytes__()
         self.assertEqual(self.expected_headers_ipv4 +
                          self.expected_headers_tcp, tcp_pack)
+
+    def test_parse_tcp_pack(self):
+        pack = tcp_package.TCPPackage(flags=tcp_package.TCPPackageType.SYN,
+                                      source_ip="127.0.0.1",
+                                      dest_ip="123.123.123.123",
+                                      dest_port=443,
+                                      seq=25,
+                                      ack_seq=52)
+        tcp_pack = pack.__bytes__()
+        tcp_parsed = tcp_package.TCPPackage.parse_tcp_ipv4_package(tcp_pack)
+        self.assertEqual(tcp_pack[38], tcp_parsed.__bytes__()[38])
 
 
 if __name__ == '__main__':
