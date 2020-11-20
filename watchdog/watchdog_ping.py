@@ -38,8 +38,10 @@ class WatchdogPingData:
 
         pings = []
         for destination in self.destinations:
-            wd_ping = ping.TCPing(destination=destination[0], port=destination[1],
-                                  timeout=self.timeout, use_ipv6=self.use_ipv6)
+            wd_ping = ping.TCPing(destination=destination[0],
+                                  port=destination[1],
+                                  timeout=self.timeout,
+                                  use_ipv6=self.use_ipv6)
             pings.append(wd_ping)
         return pings
 
@@ -64,7 +66,11 @@ class WatchdogPingData:
                   time, ip and port status for group of measures."""
 
         table = PrettyTable()
-        table.field_names = ['destination', 'ip', 'port', 'time ms', 'condition']
+        table.field_names = ['destination',
+                             'ip',
+                             'port',
+                             'time ms',
+                             'condition']
         for measure_with_destination in meaures:
             destination = measure_with_destination[1]
             port = measure_with_destination[0].port
