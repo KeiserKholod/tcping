@@ -25,6 +25,17 @@ class StatisticsData(float):
         if time < 0:
             self.is_failed = True
 
+    def __str__(self):
+        """Return string with information about duration,
+         destination ip and por and status of a single ping"""
+
+        answer = 'From: [{}:{}];'.format(str(self.ip),
+                                         str(self.port))
+        if self.is_failed:
+            return ' '.join((answer, 'Failed;'))
+        return ' '.join((answer, 'Time: {}ms;'
+                         .format(str(round(self * 1000, 3)))))
+
 
 class TimeMeasure:
     """Context manager for ping duration measuring."""
@@ -80,13 +91,13 @@ class TCPing:
             self.ip = dest_ip
         seq: int = 0
         ack_seq: int = 0
-        syn_pack = tcp_package.TCPPackage(flags=tcp_package.TCPPackageType.SYN,
-                                          source_ip=source_ip,
-                                          dest_ip=dest_ip,
-                                          dest_port=self.port,
-                                          seq=seq,
-                                          ack_seq=ack_seq,
-                                          source_port=source_port).__bytes__()
+        syn_pack = bytes(tcp_package.TCPPackage(flags=tcp_package.TCPPackageType.SYN,
+                                                source_ip=source_ip,
+                                                dest_ip=dest_ip,
+                                                dest_port=self.port,
+                                                seq=seq,
+                                                ack_seq=ack_seq,
+                                                source_port=source_port))
         try:
             sock = socket.socket(socket.AF_INET,
                                  socket.SOCK_RAW,
@@ -139,17 +150,3 @@ class TCPing:
             return -1
         finally:
             sock.close()
-
-    @staticmethod
-    def prepare_ping_info(stat_data: StatisticsData):
-        """Return string with information about duration,
-         destination ip and por and status of a single ping"""
-
-        if stat_data.is_failed:
-            return 'From: [{}:{}]; Failed;' \
-                .format(str(stat_data.ip),
-                        str(stat_data.port))
-        return 'From: [{}:{}]; Time: {}ms;' \
-            .format(str(stat_data.ip),
-                    str(stat_data.port),
-                    str(round(stat_data * 1000, 3)))
