@@ -58,8 +58,8 @@ def show_watchdog_tui(screen):
                     .WatchdogPingData \
                     .get_measures_to_print(measures_to_print)
                 screen.clear()
-                last_info = table.__str__()
-                lines = table.__str__().split("\n")
+                last_info = str(table)
+                lines = str(table).split("\n")
                 i = 0
                 for line in lines:
                     i += 1

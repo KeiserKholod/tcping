@@ -1,5 +1,4 @@
 import unittest
-from unittest import mock
 from tcping import ping
 from tcping import __main__ as tcping
 from tcping import errors
@@ -15,8 +14,10 @@ class TestCorrectPings(unittest.TestCase):
             mock_socket.return_value.recv.return_value = b""
             cmd_parser = tcping.create_cmd_parser()
             args = cmd_parser.parse_args(['google.com'])
-            tcp_ping = ping.TCPing(destination=args.destination, port=args.port,
-                                   timeout=args.timeout, use_ipv6=args.use_ipv6)
+            tcp_ping = ping.TCPing(destination=args.destination,
+                                   port=args.port,
+                                   timeout=args.timeout,
+                                   use_ipv6=args.use_ipv6)
             tcp_ping.do_ping()
         self.assertEqual(len(tcp_ping.measures), 1)
 
@@ -25,8 +26,10 @@ class TestCorrectPings(unittest.TestCase):
             mock_socket.return_value.recv.return_value = b""
             cmd_parser = tcping.create_cmd_parser()
             args = cmd_parser.parse_args(['google.csom'])
-            tcp_ping = ping.TCPing(destination=args.destination, port=args.port,
-                                   timeout=args.timeout, use_ipv6=args.use_ipv6)
+            tcp_ping = ping.TCPing(destination=args.destination,
+                                   port=args.port,
+                                   timeout=args.timeout,
+                                   use_ipv6=args.use_ipv6)
 
             with self.assertRaises(errors.InvalidIpOrDomain):
                 tcp_ping.do_ping()
@@ -36,8 +39,10 @@ class TestCorrectPings(unittest.TestCase):
             mock_socket.return_value.recv.return_value = b""
             cmd_parser = tcping.create_cmd_parser()
             args = cmd_parser.parse_args(['64.233.165.101', '-c', '10'])
-            tcp_ping = ping.TCPing(destination=args.destination, port=args.port,
-                                   timeout=args.timeout, use_ipv6=args.use_ipv6)
+            tcp_ping = ping.TCPing(destination=args.destination,
+                                   port=args.port,
+                                   timeout=args.timeout,
+                                   use_ipv6=args.use_ipv6)
             tcp_ping.do_ping()
         self.assertEqual(len(tcp_ping.measures), 1)
 
@@ -46,8 +51,10 @@ class TestCorrectPings(unittest.TestCase):
             mock_socket.return_value.recv.return_value = b""
             cmd_parser = tcping.create_cmd_parser()
             args = cmd_parser.parse_args(['64.233.165.101.123.214'])
-            tcp_ping = ping.TCPing(destination=args.destination, port=args.port,
-                                   timeout=args.timeout, use_ipv6=args.use_ipv6)
+            tcp_ping = ping.TCPing(destination=args.destination,
+                                   port=args.port,
+                                   timeout=args.timeout,
+                                   use_ipv6=args.use_ipv6)
             with self.assertRaises(errors.InvalidIpOrDomain):
                 tcp_ping.do_ping()
 
@@ -87,13 +94,13 @@ class TestStatistics(unittest.TestCase):
     def test_prepare_ping_info(self):
         expected = "From: [127.0.0.1:123]; Time: 51.0ms;"
         single_stat = ping.StatisticsData(0.051, ip='127.0.0.1', port=123)
-        ping_info = ping.TCPing.prepare_ping_info(single_stat)
+        ping_info = str(single_stat)
         self.assertEqual(expected, ping_info)
 
     def test_prepare_ping_info_if_failed(self):
         expected = "From: [127.0.0.1:123]; Failed;"
         single_stat = ping.StatisticsData(-1, ip='127.0.0.1', port=123)
-        ping_info = ping.TCPing.prepare_ping_info(single_stat)
+        ping_info = str(single_stat)
         self.assertEqual(expected, ping_info)
 
     def test_statistics_all_successful(self):
