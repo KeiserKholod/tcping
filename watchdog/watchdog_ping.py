@@ -8,10 +8,10 @@ class WatchdogPingData:
      group of Ping objects and
          table with information about group of pings."""
 
-    def __init__(self, destinations: list = [],
+    def __init__(self, destinations: list = None,
                  timeout: float = 0,
                  use_ipv6: bool = False):
-        self.destinations = destinations
+        self.destinations = destinations or []
         self.timeout = timeout
         self.use_ipv6 = use_ipv6
 
