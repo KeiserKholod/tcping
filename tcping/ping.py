@@ -91,13 +91,14 @@ class TCPing:
             self.ip = dest_ip
         seq: int = 0
         ack_seq: int = 0
-        syn_pack = bytes(tcp_package.TCPPackage(flags=tcp_package.TCPPackageType.SYN,
-                                                source_ip=source_ip,
-                                                dest_ip=dest_ip,
-                                                dest_port=self.port,
-                                                seq=seq,
-                                                ack_seq=ack_seq,
-                                                source_port=source_port))
+        syn_pack = bytes(
+            tcp_package.TCPPackage(flags=tcp_package.TCPPackageType.SYN,
+                                   source_ip=source_ip,
+                                   dest_ip=dest_ip,
+                                   dest_port=self.port,
+                                   seq=seq,
+                                   ack_seq=ack_seq,
+                                   source_port=source_port))
         try:
             sock = socket.socket(socket.AF_INET,
                                  socket.SOCK_RAW,

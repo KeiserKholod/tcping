@@ -13,9 +13,9 @@ class TCPPackageType(enum.IntFlag):
 
 
 class TCPPackage:
-    def __init__(self, flags: TCPPackageType = TCPPackageType.SYN,
-                 source_ip: str = "127.0.0.1",
-                 dest_ip: str = "87.250.250.242",
+    def __init__(self, source_ip: str,
+                 dest_ip: str,
+                 flags: TCPPackageType = TCPPackageType.SYN,
                  source_port: int = 0,
                  dest_port: int = 80,
                  window_size: int = 5840,
@@ -138,7 +138,7 @@ class TCPPackage:
     @staticmethod
     # не получается сделать тайпинг на обьект текущего класса
     def parse_tcp_ipv4_package(raw_data):
-        package = TCPPackage()
+        package = TCPPackage("", "")
         TCPPackage.parse_ipv4_headers(package, raw_data[:40])
         TCPPackage.parse_tcp_headers(package, raw_data[:40])
         return package
