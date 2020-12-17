@@ -233,7 +233,9 @@ class TestWatchdog(unittest.TestCase):
         self.assertEqual(type(pings[1]), ping.TCPing)
 
     def test_get_measures_to_print(self):
-        measures_to_print_expected = """+-------------+-------------+------+---------+-----------+
+        measures_to_print_expected = """+-------------+""" \
+                                     """-------------+------+"""\
+                                     """---------+-----------+
 | destination |      ip     | port | time ms | condition |
 +-------------+-------------+------+---------+-----------+
 |  hemlo.com  |  127.0.0.1  | 123  |   0.05  |    Open   |
